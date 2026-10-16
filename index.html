@@ -40,6 +40,10 @@ input[type=number]{width:58px}
 .cell.on{background:#d9f5e3;color:#116b38}.cell.off{background:#fde0e0;color:#a31d1d}
 .brk td{background:var(--card);color:var(--mut);font-size:.7rem;padding:2px}
 .ab{display:flex;gap:6px;flex-wrap:wrap}
+.md{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:12px}
+.md[hidden]{display:none}
+.mc{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;width:min(620px,100%);max-height:92vh;overflow:auto}
+.mh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.mh button{margin:0}
 .lg{display:flex;gap:12px;font-size:.8rem;align-items:center}.lg i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:middle;margin-inline-end:4px}
 .ad{display:flex;gap:6px}.ad input{flex:1;min-width:0}.ad button{margin:0;padding:6px 14px}
 textarea{font:inherit;padding:5px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);width:180px;resize:vertical}
@@ -68,12 +72,13 @@ body.pc .sheet[data-k=t],body.pt .sheet[data-k=c]{display:none}}
 <tbody id="subs"></tbody><tfoot><tr><th>المجموع الأسبوعي</th><th id="t0"></th><th id="t1"></th><th id="t2"></th><th id="t3"></th></tr></tfoot></table></div>
 </div>
 <div class="card"><h2>أسماء الأساتذة</h2>
-<p class="hint">أضف أساتذة كل مادة: اكتب الاسم ثم اضغط «إضافة». لكل أستاذ زر «تعديل الأوقات» يفتح جدولا بالساعات الفعلية (من 08:15 إلى 16:15) لتحديد الأوقات المتاحة (أخضر) وأوقات عدم التوفر (أحمر) بدقة، ويمكن تعديله في أي وقت. الشارة الخضراء تعني أن العدد كافٍ، والحمراء تعني أنه ينقص أساتذة.</p>
+<p class="hint">أضف أساتذة كل مادة: اكتب الاسم ثم اضغط «إضافة». لكل أستاذ زر «تخصيص الأوقات» يفتح نافذة تحتوي جدولا بالساعات الفعلية (من 08:15 إلى 16:15) لتحديد الأوقات المتاحة (أخضر) وأوقات عدم التوفر (أحمر) بدقة، ويمكن تعديله في أي وقت. الشارة الخضراء تعني أن العدد كافٍ، والحمراء تعني أنه ينقص أساتذة.</p>
 <div id="tg" class="tg"></div>
 <button class="s" onclick="sug()">إضافة أساتذة افتراضيين للأعداد الناقصة</button>
 <button onclick="go()">توليد الجدول</button>
 <div id="msg"></div>
 </div></div>
+<div id="md" class="no md" hidden onclick="if(event.target===this)cm()"><div class="mc"><div class="mh"><b id="mt"></b><button onclick="cm()">تم</button></div><div id="mb"></div></div></div>
 <div id="out"></div>
 <div class="no" id="pb" hidden><button onclick="dl('c')">تحميل جدول التلاميذ (PDF)</button><button onclick="dl('t')">تحميل جدول الأساتذة (PDF)</button> <small style="color:var(--mut)">في نافذة الطباعة اختر «حفظ بصيغة PDF»</small></div>
 </div>
@@ -107,7 +112,7 @@ function grid(i,k,t){
  return h+`</table><div class="ab"><button class="s sm" onclick="ta(${i},${k},false)">الكل متاح</button><button class="s sm" onclick="ta(${i},${k},true)">الكل غير متاح</button></div><div class="em">انقر على أي خانة لتبديلها أو اسحب لتلوين عدة خانات. انقر على اسم اليوم أو على الوقت لتبديل العمود أو الصف كاملا.</div></div>`}
 function trow(i,k,t){
  const o=rngs(t);
- return `<div class="tw"><div class="hd"><b>${esc(t.n)}</b><button class="s sm" onclick="tog(${i},${k})">${t.open?'إغلاق':'تعديل الأوقات'}</button><button class="x" onclick="del(${i},${k})" aria-label="حذف">×</button></div><div class="em">${o.length?'غير متاح — '+o.join(' | '):'متاح طوال الأسبوع'}</div>${t.open?grid(i,k,t):''}</div>`}
+ return `<div class="tw"><div class="hd"><b>${esc(t.n)}</b><button class="s sm" onclick="om(${i},${k})">تخصيص الأوقات</button><button class="x" onclick="del(${i},${k})" aria-label="حذف">×</button></div><div class="em">${o.length?'غير متاح — '+o.join(' | '):'متاح طوال الأسبوع'}</div></div>`}
 function rt(){
  $('#tg').innerHTML=SUB.map((s,i)=>{
   if(!hy(i).some(x=>x))return '';
@@ -116,19 +121,24 @@ function rt(){
   <div class="tl">${TN[i].map((t,k)=>trow(i,k,t)).join('')||'<span class="em">لم يُضف أي أستاذ بعد</span>'}</div>
   <div class="ad"><input id="in${i}" placeholder="اسم الأستاذ" onkeydown="if(event.key==='Enter'){event.preventDefault();add(${i})}"><button onclick="add(${i})">إضافة</button></div></div>`}).join('')}
 const mk=n=>({n,off:Array(35).fill(false),open:false});
-function add(i){const v=$('#in'+i).value.split(/[,،\n]/).map(x=>x.trim()).filter(Boolean);if(!v.length)return;const o=v.map(mk);if(o.length==1)o[0].open=true;TN[i].push(...o);rt();$('#in'+i).focus()}
+function add(i){const v=$('#in'+i).value.split(/[,،\n]/).map(x=>x.trim()).filter(Boolean);if(!v.length)return;TN[i].push(...v.map(mk));rt();$('#in'+i).focus()}
 function del(i,k){TN[i].splice(k,1);rt()}
-function tog(i,k){TN[i][k].open=!TN[i][k].open;rt()}
+let MD=null;
+function om(i,k){MD={i,k};rm()}
+function cm(){MD=null;rm();rt()}
+function rm(){const m=$('#md');if(!MD){m.hidden=true;return}const t=TN[MD.i][MD.k];m.hidden=false;$('#mt').textContent='تخصيص أوقات الأستاذ: '+t.n+' ('+SUB[MD.i][0]+')';$('#mb').innerHTML=grid(MD.i,MD.k,t)}
+const rf=()=>{rt();rm()};
+addEventListener('keydown',e=>{if(e.key==='Escape'&&MD)cm()});
 const flip=(t,ix)=>{const v=!ix.every(x=>t.off[x]);ix.forEach(x=>t.off[x]=v)};
-function td(i,k,d){flip(TN[i][k],[0,1,2,3,4,5,6].map(s=>d*7+s));rt()}
-function tp(i,k,s){flip(TN[i][k],[0,1,2,3,4].map(d=>d*7+s));rt()}
-function ta(i,k,v){TN[i][k].off.fill(v);rt()}
+function td(i,k,d){flip(TN[i][k],[0,1,2,3,4,5,6].map(s=>d*7+s));rf()}
+function tp(i,k,s){flip(TN[i][k],[0,1,2,3,4].map(d=>d*7+s));rf()}
+function ta(i,k,v){TN[i][k].off.fill(v);rf()}
 function sug(){SUB.forEach((s,i)=>{const m=mn(i);while(TN[i].length<m)TN[i].push(mk(`أستاذ ${s[0]} ${TN[i].length+1}`))});rt()}
 let pt=null;
 const setc=(c,x)=>{TN[pt.i][pt.k].off[x]=pt.v;c.className='cell '+(pt.v?'off':'on');c.textContent=pt.v?'غير متاح':'متاح'};
-$('#tg').addEventListener('pointerdown',e=>{const c=e.target.closest('.cell');if(!c)return;const g=c.closest('.gw'),i=+g.dataset.i,k=+g.dataset.k,x=+c.dataset.x;pt={i,k,v:!TN[i][k].off[x]};setc(c,x);e.preventDefault()});
-$('#tg').addEventListener('pointermove',e=>{if(!pt)return;const el=document.elementFromPoint(e.clientX,e.clientY),c=el&&el.closest('.cell');if(!c)return;const g=c.closest('.gw');if(+g.dataset.i!==pt.i||+g.dataset.k!==pt.k)return;setc(c,+c.dataset.x)});
-addEventListener('pointerup',()=>{if(pt){pt=null;rt()}});
+$('#md').addEventListener('pointerdown',e=>{const c=e.target.closest('.cell');if(!c)return;const g=c.closest('.gw'),i=+g.dataset.i,k=+g.dataset.k,x=+c.dataset.x;pt={i,k,v:!TN[i][k].off[x]};setc(c,x);e.preventDefault()});
+$('#md').addEventListener('pointermove',e=>{if(!pt)return;const el=document.elementFromPoint(e.clientX,e.clientY),c=el&&el.closest('.cell');if(!c)return;const g=c.closest('.gw');if(+g.dataset.i!==pt.i||+g.dataset.k!==pt.k)return;setc(c,+c.dataset.x)});
+addEventListener('pointerup',()=>{if(pt){pt=null;rf()}});
 upd();
 const msg=(t,c='err')=>{$('#msg').innerHTML=`<p class="${c}">${t}</p>`;return 0};
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
