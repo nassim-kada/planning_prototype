@@ -17,7 +17,7 @@ th,td{border:1px solid var(--bd);padding:6px;text-align:center;font-size:.9rem}
 input{font:inherit;padding:5px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);max-width:100%}
 input[type=number]{width:58px}
 .hint{color:var(--mut);font-size:.88rem;margin:.2em 0 .8em}
-.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:10px}
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:12px;margin-bottom:10px}
 .tc{border:1px solid var(--bd);border-radius:12px;padding:12px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
 .th{display:flex;align-items:center;gap:8px}
 .dot{width:12px;height:12px;border-radius:50%;flex:none}
@@ -27,7 +27,20 @@ input[type=number]{width:58px}
 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:99px;padding:3px 6px 3px 12px;font-size:.88rem}
 .chip .x{background:none;color:var(--mut);padding:0 6px;margin:0;font-size:1.1rem;line-height:1}
 .chip .x:hover{color:#d33}
-.em{color:var(--mut);font-size:.85rem}
+.em{color:var(--mut);font-size:.82rem}
+.tl{display:flex;flex-direction:column;gap:8px}
+.tw{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.hd{display:flex;align-items:center;gap:6px}.hd b{flex:1}
+.sm{margin:0;padding:3px 10px;font-size:.8rem}
+.hd .x{background:none;color:var(--mut);padding:0 8px;margin:0;font-size:1.2rem;line-height:1}.hd .x:hover{color:#d33}
+.av{border-collapse:collapse;width:100%;user-select:none}
+.av th,.av td{padding:4px 2px;font-size:.75rem}
+.hc{cursor:pointer;background:var(--card)}.hc:hover{color:var(--ac)}
+.cell{cursor:pointer;touch-action:none;font-weight:700;min-width:46px}
+.cell.on{background:#d9f5e3;color:#116b38}.cell.off{background:#fde0e0;color:#a31d1d}
+.brk td{background:var(--card);color:var(--mut);font-size:.7rem;padding:2px}
+.ab{display:flex;gap:6px;flex-wrap:wrap}
+.lg{display:flex;gap:12px;font-size:.8rem;align-items:center}.lg i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:middle;margin-inline-end:4px}
 .ad{display:flex;gap:6px}.ad input{flex:1;min-width:0}.ad button{margin:0;padding:6px 14px}
 textarea{font:inherit;padding:5px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);width:180px;resize:vertical}
 button{font:inherit;background:var(--ac);color:#fff;border:0;border-radius:8px;padding:9px 16px;cursor:pointer;margin:4px}
@@ -36,7 +49,9 @@ button.s{background:transparent;color:var(--ac);border:1px solid var(--ac)}
 .tt td{height:54px;color:#111;min-width:96px}.tt small{color:#333}
 .br td{background:var(--bg);height:auto;color:var(--mut);font-size:.8rem}
 .sheet{margin-bottom:22px}
+#out{display:none}
 @media print{@page{size:A4 landscape;margin:10mm}
+#out{display:block}
 html,body{background:#fff;color:#000}.no{display:none!important}
 .sheet{page-break-after:always;margin:0}.tt th{background:#eee;color:#000}.tt td{height:15mm}
 .br td{background:#f3f3f3;color:#333}
@@ -45,7 +60,7 @@ body.pc .sheet[data-k=t],body.pt .sheet[data-k=c]{display:none}}
 <div class="no">
 <h1>مولّد جدول التوقيت للمؤسسة الخاصة</h1>
 <div class="card">
-<label>اسم المؤسسة: <input id="sch" size="24"></label>
+<label>اسم المؤسسة: <input id="sch" value="المؤسسة الخاصة" size="24"></label>
 <label> السنة الدراسية: <input id="yr" value="2026/2027" size="10"></label>
 <label> أقصى حجم ساعي أسبوعي للأستاذ: <input type="number" id="ml" value="24" min="1" max="35"></label>
 <p style="color:var(--mut);font-size:.85rem">8 أقسام (4 سنوات × قسمان) — الأسبوع من الأحد إلى الخميس — 7 حصص يوميا (4 صباحا + 3 مساء) — الأستاذ لا يدرّس أكثر من ساعتين في اليوم للقسم الواحد.</p>
@@ -53,7 +68,7 @@ body.pc .sheet[data-k=t],body.pt .sheet[data-k=c]{display:none}}
 <tbody id="subs"></tbody><tfoot><tr><th>المجموع الأسبوعي</th><th id="t0"></th><th id="t1"></th><th id="t2"></th><th id="t3"></th></tr></tfoot></table></div>
 </div>
 <div class="card"><h2>أسماء الأساتذة</h2>
-<p class="hint">أضف أساتذة كل مادة: اكتب الاسم ثم اضغط «إضافة» (أو زر الإدخال). يمكنك لصق عدة أسماء مفصولة بفاصلة. الشارة الخضراء تعني أن العدد كافٍ، والحمراء تعني أنه ينقص أساتذة.</p>
+<p class="hint">أضف أساتذة كل مادة: اكتب الاسم ثم اضغط «إضافة». لكل أستاذ زر «تعديل الأوقات» يفتح جدولا بالساعات الفعلية (من 08:15 إلى 16:15) لتحديد الأوقات المتاحة (أخضر) وأوقات الراحة (أحمر) بدقة، ويمكن تعديله في أي وقت. الشارة الخضراء تعني أن العدد كافٍ، والحمراء تعني أنه ينقص أساتذة.</p>
 <div id="tg" class="tg"></div>
 <button class="s" onclick="sug()">إضافة أساتذة افتراضيين للأعداد الناقصة</button>
 <button onclick="go()">توليد الجدول</button>
@@ -82,16 +97,38 @@ $('#ml').oninput=upd;
 const TN=SUB.map(()=>[]);
 const esc=t=>t.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const mn=i=>minT(hy(i),+$('#ml').value||24);
+const rngs=t=>{const p=[];for(let d=0;d<5;d++){const r=[];let s=0;while(s<7){if(t.off[d*7+s]){let e=s;while(e+1<7&&t.off[d*7+e+1])e++;r.push(s==0&&e==6?'طوال اليوم':PER[s].split(' - ')[0]+' إلى '+PER[e].split(' - ')[1]);s=e+1}else s++}
+ if(r.length)p.push(DAYS[d]+': '+r.join(' و '))}return p};
+function grid(i,k,t){
+ let h=`<div class="gw" data-i="${i}" data-k="${k}"><div class="lg"><span><i style="background:#d9f5e3"></i>متاح للتدريس</span><span><i style="background:#fde0e0"></i>راحة (لا تُبرمج له حصص)</span></div><table class="av"><tr><th>الوقت</th>${DAYS.map((d,x)=>`<th class="hc" onclick="td(${i},${k},${x})">${d}</th>`).join('')}</tr>`;
+ PER.forEach((p,s)=>{h+=`<tr><th class="hc" onclick="tp(${i},${k},${s})">${p}</th>`+DAYS.map((_,d)=>{const o=t.off[d*7+s];return `<td class="cell ${o?'off':'on'}" data-x="${d*7+s}">${o?'راحة':'متاح'}</td>`}).join('')+'</tr>';
+  if(s==1)h+='<tr class="brk"><td colspan="6">استراحة 10:15 - 10:30</td></tr>';
+  if(s==3)h+='<tr class="brk"><td colspan="6">فترة الغداء 12:30 - 13:15</td></tr>'});
+ return h+`</table><div class="ab"><button class="s sm" onclick="ta(${i},${k},false)">الكل متاح</button><button class="s sm" onclick="ta(${i},${k},true)">الكل راحة</button></div><div class="em">انقر على أي خانة لتبديلها أو اسحب لتلوين عدة خانات. انقر على اسم اليوم أو على الوقت لتبديل العمود أو الصف كاملا.</div></div>`}
+function trow(i,k,t){
+ const o=rngs(t);
+ return `<div class="tw"><div class="hd"><b>${esc(t.n)}</b><button class="s sm" onclick="tog(${i},${k})">${t.open?'إغلاق':'تعديل الأوقات'}</button><button class="x" onclick="del(${i},${k})" aria-label="حذف">×</button></div><div class="em">${o.length?'راحة — '+o.join(' | '):'متاح طوال الأسبوع'}</div>${t.open?grid(i,k,t):''}</div>`}
 function rt(){
  $('#tg').innerHTML=SUB.map((s,i)=>{
   if(!hy(i).some(x=>x))return '';
   const m=mn(i),n=TN[i].length;
   return `<div class="tc"><div class="th"><span class="dot" style="background:hsl(${i*27} 70% 60%)"></span><b>${s[0]}</b><span class="bd ${n>=m?'g':'r'}">${n} من ${m} أستاذ</span></div>
-  <div class="ch">${TN[i].map((x,k)=>`<span class="chip">${esc(x)}<button class="x" onclick="del(${i},${k})" aria-label="حذف">×</button></span>`).join('')||'<span class="em">لم يُضف أي أستاذ بعد</span>'}</div>
+  <div class="tl">${TN[i].map((t,k)=>trow(i,k,t)).join('')||'<span class="em">لم يُضف أي أستاذ بعد</span>'}</div>
   <div class="ad"><input id="in${i}" placeholder="اسم الأستاذ" onkeydown="if(event.key==='Enter'){event.preventDefault();add(${i})}"><button onclick="add(${i})">إضافة</button></div></div>`}).join('')}
-function add(i){const v=$('#in'+i).value.split(/[,،\n]/).map(x=>x.trim()).filter(Boolean);TN[i].push(...v);rt();$('#in'+i).focus()}
+const mk=n=>({n,off:Array(35).fill(false),open:false});
+function add(i){const v=$('#in'+i).value.split(/[,،\n]/).map(x=>x.trim()).filter(Boolean);if(!v.length)return;const o=v.map(mk);if(o.length==1)o[0].open=true;TN[i].push(...o);rt();$('#in'+i).focus()}
 function del(i,k){TN[i].splice(k,1);rt()}
-function sug(){SUB.forEach((s,i)=>{const m=mn(i);while(TN[i].length<m)TN[i].push(`أستاذ ${s[0]} ${TN[i].length+1}`)});rt()}
+function tog(i,k){TN[i][k].open=!TN[i][k].open;rt()}
+const flip=(t,ix)=>{const v=!ix.every(x=>t.off[x]);ix.forEach(x=>t.off[x]=v)};
+function td(i,k,d){flip(TN[i][k],[0,1,2,3,4,5,6].map(s=>d*7+s));rt()}
+function tp(i,k,s){flip(TN[i][k],[0,1,2,3,4].map(d=>d*7+s));rt()}
+function ta(i,k,v){TN[i][k].off.fill(v);rt()}
+function sug(){SUB.forEach((s,i)=>{const m=mn(i);while(TN[i].length<m)TN[i].push(mk(`أستاذ ${s[0]} ${TN[i].length+1}`))});rt()}
+let pt=null;
+const setc=(c,x)=>{TN[pt.i][pt.k].off[x]=pt.v;c.className='cell '+(pt.v?'off':'on');c.textContent=pt.v?'راحة':'متاح'};
+$('#tg').addEventListener('pointerdown',e=>{const c=e.target.closest('.cell');if(!c)return;const g=c.closest('.gw'),i=+g.dataset.i,k=+g.dataset.k,x=+c.dataset.x;pt={i,k,v:!TN[i][k].off[x]};setc(c,x);e.preventDefault()});
+$('#tg').addEventListener('pointermove',e=>{if(!pt)return;const el=document.elementFromPoint(e.clientX,e.clientY),c=el&&el.closest('.cell');if(!c)return;const g=c.closest('.gw');if(+g.dataset.i!==pt.i||+g.dataset.k!==pt.k)return;setc(c,+c.dataset.x)});
+addEventListener('pointerup',()=>{if(pt){pt=null;rt()}});
 upd();
 const msg=(t,c='err')=>{$('#msg').innerHTML=`<p class="${c}">${t}</p>`;return 0};
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -99,18 +136,29 @@ function go(){
  const L=+$('#ml').value||24,HY=SUB.map((_,i)=>hy(i));
  const hc=CL.map((_,c)=>HY.map(h=>h[c>>1])),Hc=hc.map(a=>a.reduce((x,y)=>x+y,0));
  if(Hc.some(x=>x<1||x>35))return msg('مجموع الساعات الأسبوعية لكل سنة يجب أن يكون بين 1 و 35');
+ const len=Hc.map(H=>[0,1,2,3,4].map(d=>Math.floor(H/5)+(d<H%5?1:0)));
  const T=[],ts=SUB.map(()=>[]);
- SUB.forEach((s,i)=>{if(!HY[i].some(x=>x))return;const nm=TN[i],n=nm.length;
-  for(let k=0;k<n;k++){const t={name:nm[k]||`أستاذ ${s[0]} ${k+1}`,sub:i,load:0,id:T.length};T.push(t);ts[i].push(t)}});
- const bad=[];SUB.forEach((s,i)=>{if(HY[i].some(x=>x)&&ts[i].length<minT(HY[i],L))bad.push(`${s[0]}: المطلوب ${minT(HY[i],L)} على الأقل، المُدخل ${ts[i].length}`)});
+ SUB.forEach((sb,i)=>{if(!HY[i].some(x=>x))return;TN[i].forEach(o=>{const t={name:o.n,sub:i,load:0,id:T.length,off:o.off.slice(),av:o.off.filter(v=>!v).length};T.push(t);ts[i].push(t)})});
+ const bad=[];SUB.forEach((sb,i)=>{if(HY[i].some(x=>x)&&ts[i].length<minT(HY[i],L))bad.push(`${sb[0]}: المطلوب ${minT(HY[i],L)} على الأقل، المُدخل ${ts[i].length}`)});
  if(bad.length)return msg('عدد الأساتذة غير كافٍ:\n'+bad.join('\n'));
- const tOf=CL.map(()=>[]);
- SUB.forEach((_,i)=>{if(!ts[i].length)return;[...CL.keys()].filter(c=>hc[c][i]>0).sort((a,b)=>hc[b][i]-hc[a][i]).forEach(c=>{
-  const t=ts[i].reduce((a,b)=>b.load<a.load?b:a);t.load+=hc[c][i];tOf[c][i]=t.id})});
- const over=T.filter(t=>t.load>L);if(over.length)return msg('تجاوز الحجم الساعي المسموح: '+over.map(t=>t.name).join('، '));
+ const errs=[];
+ for(let d=0;d<5;d++){const w=[];for(let s=0;s<7;s++){const act=CL.filter((_,c)=>s<len[c][d]).length,av=T.filter(t=>!t.off[d*7+s]).length;if(av<act)w.push(`${PER[s]} (يلزم ${act} أساتذة والمتاحون ${av})`)}
+  if(w.length)errs.push(`يوم ${DAYS[d]}: عدد الأساتذة المتاحين أقل من عدد الأقسام التي تدرس في وقت واحد، في الحصص: ${w.join('، ')}. قلّل أوقات الراحة في هذه الأوقات أو أضف أساتذة.`)}
+ const feas=(t,c)=>{let m=0;for(let d=0;d<5;d++){const ok=[];for(let s=0;s<len[c][d];s++)ok.push(!t.off[d*7+s]);let b=ok.some(x=>x)?1:0;for(let s=0;s+1<ok.length;s++)if(ok[s]&&ok[s+1]&&s!==3)b=2;m+=b}return m};
+ const cap=t=>Math.min(L,t.av)-t.load;
+ const tOf=CL.map(()=>[]),cls={};
+ SUB.forEach((sb,i)=>{if(!ts[i].length)return;
+  [...CL.keys()].filter(c=>hc[c][i]>0).sort((a,b)=>hc[b][i]-hc[a][i]).forEach(c=>{
+   const h=hc[c][i],ok=ts[i].filter(t=>feas(t,c)>=h&&cap(t)>=h);
+   if(!ok.length){const fe=ts[i].filter(t=>feas(t,c)>=h);
+    if(!fe.length){const b=ts[i].reduce((a,t)=>feas(t,c)>feas(a,c)?t:a),k=`مادة «${sb[0]}» تحتاج ${h} ساعة أسبوعيا لكل قسم (بحد أقصى ساعتان يوميا)، بينما لا تسمح أوقات راحة أساتذتها إلا بـ ${feas(b,c)} ساعة كحد أقصى (الأقرب: ${b.name})، وذلك في الأقسام: `;(cls[k]=cls[k]||[]).push(CL[c])}
+    else errs.push(`مادة «${sb[0]}» تحتاج ${hc.reduce((x,y)=>x+y[i],0)} ساعة أسبوعيا لكل الأقسام، بينما يغطي أساتذتها ${ts[i].reduce((x,t)=>x+Math.min(L,t.av),0)} ساعة فقط حسب الحد الأقصى (${L} ساعة) وأوقات الراحة. أضف أستاذا لهذه المادة أو قلّل أوقات الراحة.`);return}
+   const t=ok.reduce((a,b)=>cap(b)>cap(a)?b:a);t.load+=h;tOf[c][i]=t.id})});
+ errs.push(...Object.entries(cls).map(([k,v])=>k+v.join('، ')+'.'));
+ if(errs.length)return msg('لا يمكن إنجاز الجدول للأسباب التالية:\n'+[...new Set(errs)].join('\n'));
  msg('جاري التوليد...','ok');
  setTimeout(()=>{
-  const len=Hc.map(H=>[0,1,2,3,4].map(d=>Math.floor(H/5)+(d<H%5?1:0))),t0=performance.now();let grid=null;
+  const t0=performance.now();let grid=null;
   while(!grid&&performance.now()-t0<25000){
    const order=shuf([...CL.keys()]),cells=[];
    for(let d=0;d<5;d++)for(let s=0;s<7;s++)for(const c of order)if(s<len[c][d])cells.push([c,d,s]);
@@ -121,7 +169,7 @@ function go(){
     if(k==cells.length)return true;if(++nodes>30000)throw 0;
     const[c,d,s]=cells[k],cand=[];
     for(let i=0;i<NS;i++){if(rem[c][i]<=0)continue;const n=dc[c][d][i];if(n>=2)continue;
-     const bt=busy[tOf[c][i]][d];if(bt[s])continue;
+     const bt=busy[tOf[c][i]][d];if(bt[s]||T[tOf[c][i]].off[d*7+s])continue;
      if(s>0&&!bt[s-1]){let e=0;for(let k=s<4?0:4;k<s;k++)if(bt[k]){e=1;break}if(e)continue}
      if(n==1&&(s==0||s==4||g[c][d][s-1]!=i))continue;
      cand.push([rem[c][i]+(CORE[i]&&s<4?1:0)+(s>0&&bt[s-1]?1.5:0)+Math.random()*2,i])}
@@ -132,7 +180,8 @@ function go(){
     return false};
    try{if(rec(0))grid=g}catch(e){}
   }
-  if(!grid)return msg('تعذّر إيجاد جدول يحقق كل الشروط. أضِف أساتذة ثم أعد المحاولة.');
+  if(!grid){const w=SUB.map((sb,i)=>{const D=hc.reduce((a,x)=>a+x[i],0),cp=ts[i].reduce((a,t)=>a+Math.min(L,t.av),0);return{sb,D,cp,r:cp?D/cp:0}}).filter(x=>x.D>0).sort((a,b)=>b.r-a.r)[0];
+   return msg(`لا يمكن إنجاز الجدول مع كل الشروط (لا انقطاع للأستاذ، ساعتان كحد أقصى يوميا لكل قسم، وأوقات الراحة). السبب الأرجح: مادة «${w.sb[0]}» تحتاج ${w.D} ساعة أسبوعيا بينما يغطي أساتذتها ${w.cp} ساعة فقط، فلا تتسع حصصها في الأوقات المتاحة. أضف أستاذا لهذه المادة أو قلّل أوقات الراحة ثم أعد المحاولة.`)}
   render(grid,T,tOf);msg('تم توليد الجدول بنجاح ✔ — '+T.length+' أستاذ','ok')},30)}
 function dl(k){document.body.className='p'+k;const done=()=>{document.body.className='';removeEventListener('afterprint',done)};addEventListener('afterprint',done);print()}
 function render(g,T,tOf){window.LAST={g,T,tOf};
@@ -146,6 +195,6 @@ function render(g,T,tOf){window.LAST={g,T,tOf};
  let o='';
  CL.forEach((n,c)=>o+=tbl('c',n,(d,s)=>{const i=g[c][d][s];return i<0?'':`<td ${col(i)}><b>${SUB[i][0]}</b><br><small>${T[tOf[c][i]].name}</small></td>`}));
  T.forEach(t=>o+=tbl('t',`الأستاذ: ${t.name} (${SUB[t.sub][0]}) — ${t.load} ساعة أسبوعيا`,(d,s)=>{
-  for(let c=0;c<8;c++){const i=g[c][d][s];if(i>=0&&tOf[c][i]==t.id)return `<td ${col(i)}><b>${CL[c]}</b><br><small>${SUB[i][0]}</small></td>`}return ''}));
- $('#out').innerHTML=o;$('#pb').hidden=false;$('#out').scrollIntoView({behavior:'smooth'})}
+  for(let c=0;c<8;c++){const i=g[c][d][s];if(i>=0&&tOf[c][i]==t.id)return `<td ${col(i)}><b>${CL[c]}</b><br><small>${SUB[i][0]}</small></td>`}return t.off[d*7+s]?'<td style="background:#e6e6e6;color:#666">راحة</td>':''}));
+ $('#out').innerHTML=o;$('#pb').hidden=false}
 </script></body></html>
