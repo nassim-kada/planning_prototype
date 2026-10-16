@@ -36,7 +36,7 @@ input[type=number]{width:58px}
 .av{border-collapse:collapse;width:100%;user-select:none}
 .av th,.av td{padding:4px 2px;font-size:.75rem}
 .hc{cursor:pointer;background:var(--card)}.hc:hover{color:var(--ac)}
-.cell{cursor:pointer;touch-action:none;font-weight:700;min-width:46px}
+.cell{cursor:pointer;touch-action:none;font-weight:700;min-width:62px;font-size:.72rem!important}
 .cell.on{background:#d9f5e3;color:#116b38}.cell.off{background:#fde0e0;color:#a31d1d}
 .brk td{background:var(--card);color:var(--mut);font-size:.7rem;padding:2px}
 .ab{display:flex;gap:6px;flex-wrap:wrap}
@@ -68,7 +68,7 @@ body.pc .sheet[data-k=t],body.pt .sheet[data-k=c]{display:none}}
 <tbody id="subs"></tbody><tfoot><tr><th>المجموع الأسبوعي</th><th id="t0"></th><th id="t1"></th><th id="t2"></th><th id="t3"></th></tr></tfoot></table></div>
 </div>
 <div class="card"><h2>أسماء الأساتذة</h2>
-<p class="hint">أضف أساتذة كل مادة: اكتب الاسم ثم اضغط «إضافة». لكل أستاذ زر «تعديل الأوقات» يفتح جدولا بالساعات الفعلية (من 08:15 إلى 16:15) لتحديد الأوقات المتاحة (أخضر) وأوقات الراحة (أحمر) بدقة، ويمكن تعديله في أي وقت. الشارة الخضراء تعني أن العدد كافٍ، والحمراء تعني أنه ينقص أساتذة.</p>
+<p class="hint">أضف أساتذة كل مادة: اكتب الاسم ثم اضغط «إضافة». لكل أستاذ زر «تعديل الأوقات» يفتح جدولا بالساعات الفعلية (من 08:15 إلى 16:15) لتحديد الأوقات المتاحة (أخضر) وأوقات عدم التوفر (أحمر) بدقة، ويمكن تعديله في أي وقت. الشارة الخضراء تعني أن العدد كافٍ، والحمراء تعني أنه ينقص أساتذة.</p>
 <div id="tg" class="tg"></div>
 <button class="s" onclick="sug()">إضافة أساتذة افتراضيين للأعداد الناقصة</button>
 <button onclick="go()">توليد الجدول</button>
@@ -100,14 +100,14 @@ const mn=i=>minT(hy(i),+$('#ml').value||24);
 const rngs=t=>{const p=[];for(let d=0;d<5;d++){const r=[];let s=0;while(s<7){if(t.off[d*7+s]){let e=s;while(e+1<7&&t.off[d*7+e+1])e++;r.push(s==0&&e==6?'طوال اليوم':PER[s].split(' - ')[0]+' إلى '+PER[e].split(' - ')[1]);s=e+1}else s++}
  if(r.length)p.push(DAYS[d]+': '+r.join(' و '))}return p};
 function grid(i,k,t){
- let h=`<div class="gw" data-i="${i}" data-k="${k}"><div class="lg"><span><i style="background:#d9f5e3"></i>متاح للتدريس</span><span><i style="background:#fde0e0"></i>راحة (لا تُبرمج له حصص)</span></div><table class="av"><tr><th>الوقت</th>${DAYS.map((d,x)=>`<th class="hc" onclick="td(${i},${k},${x})">${d}</th>`).join('')}</tr>`;
- PER.forEach((p,s)=>{h+=`<tr><th class="hc" onclick="tp(${i},${k},${s})">${p}</th>`+DAYS.map((_,d)=>{const o=t.off[d*7+s];return `<td class="cell ${o?'off':'on'}" data-x="${d*7+s}">${o?'راحة':'متاح'}</td>`}).join('')+'</tr>';
+ let h=`<div class="gw" data-i="${i}" data-k="${k}"><div class="lg"><span><i style="background:#d9f5e3"></i>متاح للتدريس</span><span><i style="background:#fde0e0"></i>غير متاح (لا تُبرمج له حصص)</span></div><table class="av"><tr><th>الوقت</th>${DAYS.map((d,x)=>`<th class="hc" onclick="td(${i},${k},${x})">${d}</th>`).join('')}</tr>`;
+ PER.forEach((p,s)=>{h+=`<tr><th class="hc" onclick="tp(${i},${k},${s})">${p}</th>`+DAYS.map((_,d)=>{const o=t.off[d*7+s];return `<td class="cell ${o?'off':'on'}" data-x="${d*7+s}">${o?'غير متاح':'متاح'}</td>`}).join('')+'</tr>';
   if(s==1)h+='<tr class="brk"><td colspan="6">استراحة 10:15 - 10:30</td></tr>';
   if(s==3)h+='<tr class="brk"><td colspan="6">فترة الغداء 12:30 - 13:15</td></tr>'});
- return h+`</table><div class="ab"><button class="s sm" onclick="ta(${i},${k},false)">الكل متاح</button><button class="s sm" onclick="ta(${i},${k},true)">الكل راحة</button></div><div class="em">انقر على أي خانة لتبديلها أو اسحب لتلوين عدة خانات. انقر على اسم اليوم أو على الوقت لتبديل العمود أو الصف كاملا.</div></div>`}
+ return h+`</table><div class="ab"><button class="s sm" onclick="ta(${i},${k},false)">الكل متاح</button><button class="s sm" onclick="ta(${i},${k},true)">الكل غير متاح</button></div><div class="em">انقر على أي خانة لتبديلها أو اسحب لتلوين عدة خانات. انقر على اسم اليوم أو على الوقت لتبديل العمود أو الصف كاملا.</div></div>`}
 function trow(i,k,t){
  const o=rngs(t);
- return `<div class="tw"><div class="hd"><b>${esc(t.n)}</b><button class="s sm" onclick="tog(${i},${k})">${t.open?'إغلاق':'تعديل الأوقات'}</button><button class="x" onclick="del(${i},${k})" aria-label="حذف">×</button></div><div class="em">${o.length?'راحة — '+o.join(' | '):'متاح طوال الأسبوع'}</div>${t.open?grid(i,k,t):''}</div>`}
+ return `<div class="tw"><div class="hd"><b>${esc(t.n)}</b><button class="s sm" onclick="tog(${i},${k})">${t.open?'إغلاق':'تعديل الأوقات'}</button><button class="x" onclick="del(${i},${k})" aria-label="حذف">×</button></div><div class="em">${o.length?'غير متاح — '+o.join(' | '):'متاح طوال الأسبوع'}</div>${t.open?grid(i,k,t):''}</div>`}
 function rt(){
  $('#tg').innerHTML=SUB.map((s,i)=>{
   if(!hy(i).some(x=>x))return '';
@@ -125,7 +125,7 @@ function tp(i,k,s){flip(TN[i][k],[0,1,2,3,4].map(d=>d*7+s));rt()}
 function ta(i,k,v){TN[i][k].off.fill(v);rt()}
 function sug(){SUB.forEach((s,i)=>{const m=mn(i);while(TN[i].length<m)TN[i].push(mk(`أستاذ ${s[0]} ${TN[i].length+1}`))});rt()}
 let pt=null;
-const setc=(c,x)=>{TN[pt.i][pt.k].off[x]=pt.v;c.className='cell '+(pt.v?'off':'on');c.textContent=pt.v?'راحة':'متاح'};
+const setc=(c,x)=>{TN[pt.i][pt.k].off[x]=pt.v;c.className='cell '+(pt.v?'off':'on');c.textContent=pt.v?'غير متاح':'متاح'};
 $('#tg').addEventListener('pointerdown',e=>{const c=e.target.closest('.cell');if(!c)return;const g=c.closest('.gw'),i=+g.dataset.i,k=+g.dataset.k,x=+c.dataset.x;pt={i,k,v:!TN[i][k].off[x]};setc(c,x);e.preventDefault()});
 $('#tg').addEventListener('pointermove',e=>{if(!pt)return;const el=document.elementFromPoint(e.clientX,e.clientY),c=el&&el.closest('.cell');if(!c)return;const g=c.closest('.gw');if(+g.dataset.i!==pt.i||+g.dataset.k!==pt.k)return;setc(c,+c.dataset.x)});
 addEventListener('pointerup',()=>{if(pt){pt=null;rt()}});
@@ -143,7 +143,7 @@ function go(){
  if(bad.length)return msg('عدد الأساتذة غير كافٍ:\n'+bad.join('\n'));
  const errs=[];
  for(let d=0;d<5;d++){const w=[];for(let s=0;s<7;s++){const act=CL.filter((_,c)=>s<len[c][d]).length,av=T.filter(t=>!t.off[d*7+s]).length;if(av<act)w.push(`${PER[s]} (يلزم ${act} أساتذة والمتاحون ${av})`)}
-  if(w.length)errs.push(`يوم ${DAYS[d]}: عدد الأساتذة المتاحين أقل من عدد الأقسام التي تدرس في وقت واحد، في الحصص: ${w.join('، ')}. قلّل أوقات الراحة في هذه الأوقات أو أضف أساتذة.`)}
+  if(w.length)errs.push(`يوم ${DAYS[d]}: عدد الأساتذة المتاحين أقل من عدد الأقسام التي تدرس في وقت واحد، في الحصص: ${w.join('، ')}. قلّل أوقات عدم التوفر في هذه الأوقات أو أضف أساتذة.`)}
  const feas=(t,c)=>{let m=0;for(let d=0;d<5;d++){const ok=[];for(let s=0;s<len[c][d];s++)ok.push(!t.off[d*7+s]);let b=ok.some(x=>x)?1:0;for(let s=0;s+1<ok.length;s++)if(ok[s]&&ok[s+1]&&s!==3)b=2;m+=b}return m};
  const cap=t=>Math.min(L,t.av)-t.load;
  const tOf=CL.map(()=>[]),cls={};
@@ -151,8 +151,8 @@ function go(){
   [...CL.keys()].filter(c=>hc[c][i]>0).sort((a,b)=>hc[b][i]-hc[a][i]).forEach(c=>{
    const h=hc[c][i],ok=ts[i].filter(t=>feas(t,c)>=h&&cap(t)>=h);
    if(!ok.length){const fe=ts[i].filter(t=>feas(t,c)>=h);
-    if(!fe.length){const b=ts[i].reduce((a,t)=>feas(t,c)>feas(a,c)?t:a),k=`مادة «${sb[0]}» تحتاج ${h} ساعة أسبوعيا لكل قسم (بحد أقصى ساعتان يوميا)، بينما لا تسمح أوقات راحة أساتذتها إلا بـ ${feas(b,c)} ساعة كحد أقصى (الأقرب: ${b.name})، وذلك في الأقسام: `;(cls[k]=cls[k]||[]).push(CL[c])}
-    else errs.push(`مادة «${sb[0]}» تحتاج ${hc.reduce((x,y)=>x+y[i],0)} ساعة أسبوعيا لكل الأقسام، بينما يغطي أساتذتها ${ts[i].reduce((x,t)=>x+Math.min(L,t.av),0)} ساعة فقط حسب الحد الأقصى (${L} ساعة) وأوقات الراحة. أضف أستاذا لهذه المادة أو قلّل أوقات الراحة.`);return}
+    if(!fe.length){const b=ts[i].reduce((a,t)=>feas(t,c)>feas(a,c)?t:a),k=`مادة «${sb[0]}» تحتاج ${h} ساعة أسبوعيا لكل قسم (بحد أقصى ساعتان يوميا)، بينما لا تسمح أوقات عدم توفر أساتذتها إلا بـ ${feas(b,c)} ساعة كحد أقصى (الأقرب: ${b.name})، وذلك في الأقسام: `;(cls[k]=cls[k]||[]).push(CL[c])}
+    else errs.push(`مادة «${sb[0]}» تحتاج ${hc.reduce((x,y)=>x+y[i],0)} ساعة أسبوعيا لكل الأقسام، بينما يغطي أساتذتها ${ts[i].reduce((x,t)=>x+Math.min(L,t.av),0)} ساعة فقط حسب الحد الأقصى (${L} ساعة) وأوقات عدم التوفر. أضف أستاذا لهذه المادة أو قلّل أوقات عدم التوفر.`);return}
    const t=ok.reduce((a,b)=>cap(b)>cap(a)?b:a);t.load+=h;tOf[c][i]=t.id})});
  errs.push(...Object.entries(cls).map(([k,v])=>k+v.join('، ')+'.'));
  if(errs.length)return msg('لا يمكن إنجاز الجدول للأسباب التالية:\n'+[...new Set(errs)].join('\n'));
@@ -181,7 +181,7 @@ function go(){
    try{if(rec(0))grid=g}catch(e){}
   }
   if(!grid){const w=SUB.map((sb,i)=>{const D=hc.reduce((a,x)=>a+x[i],0),cp=ts[i].reduce((a,t)=>a+Math.min(L,t.av),0);return{sb,D,cp,r:cp?D/cp:0}}).filter(x=>x.D>0).sort((a,b)=>b.r-a.r)[0];
-   return msg(`لا يمكن إنجاز الجدول مع كل الشروط (لا انقطاع للأستاذ، ساعتان كحد أقصى يوميا لكل قسم، وأوقات الراحة). السبب الأرجح: مادة «${w.sb[0]}» تحتاج ${w.D} ساعة أسبوعيا بينما يغطي أساتذتها ${w.cp} ساعة فقط، فلا تتسع حصصها في الأوقات المتاحة. أضف أستاذا لهذه المادة أو قلّل أوقات الراحة ثم أعد المحاولة.`)}
+   return msg(`لا يمكن إنجاز الجدول مع كل الشروط (لا انقطاع للأستاذ، ساعتان كحد أقصى يوميا لكل قسم، وأوقات عدم التوفر). السبب الأرجح: مادة «${w.sb[0]}» تحتاج ${w.D} ساعة أسبوعيا بينما يغطي أساتذتها ${w.cp} ساعة فقط، فلا تتسع حصصها في الأوقات المتاحة. أضف أستاذا لهذه المادة أو قلّل أوقات عدم التوفر ثم أعد المحاولة.`)}
   render(grid,T,tOf);msg('تم توليد الجدول بنجاح ✔ — '+T.length+' أستاذ','ok')},30)}
 function dl(k){document.body.className='p'+k;const done=()=>{document.body.className='';removeEventListener('afterprint',done)};addEventListener('afterprint',done);print()}
 function render(g,T,tOf){window.LAST={g,T,tOf};
@@ -195,6 +195,6 @@ function render(g,T,tOf){window.LAST={g,T,tOf};
  let o='';
  CL.forEach((n,c)=>o+=tbl('c',n,(d,s)=>{const i=g[c][d][s];return i<0?'':`<td ${col(i)}><b>${SUB[i][0]}</b><br><small>${T[tOf[c][i]].name}</small></td>`}));
  T.forEach(t=>o+=tbl('t',`الأستاذ: ${t.name} (${SUB[t.sub][0]}) — ${t.load} ساعة أسبوعيا`,(d,s)=>{
-  for(let c=0;c<8;c++){const i=g[c][d][s];if(i>=0&&tOf[c][i]==t.id)return `<td ${col(i)}><b>${CL[c]}</b><br><small>${SUB[i][0]}</small></td>`}return t.off[d*7+s]?'<td style="background:#e6e6e6;color:#666">راحة</td>':''}));
+  for(let c=0;c<8;c++){const i=g[c][d][s];if(i>=0&&tOf[c][i]==t.id)return `<td ${col(i)}><b>${CL[c]}</b><br><small>${SUB[i][0]}</small></td>`}return t.off[d*7+s]?'<td style="background:#e6e6e6;color:#666">غير متاح</td>':''}));
  $('#out').innerHTML=o;$('#pb').hidden=false}
 </script></body></html>
