@@ -33,6 +33,8 @@ const Y = ["أولى", "ثانية", "ثالثة", "رابعة"];
 const CL = [];
 Y.forEach((y) => [1, 2].forEach((k) => CL.push(`${y} متوسط - القسم ${k}`)));
 const $ = (s) => document.querySelector(s);
+const ACTIVE_SUBJECTS = SUB.map(() => true);
+const savedSubjectHours = SUB.map((subject) => subject[1].slice());
 const hy = (i) => [0, 1, 2, 3].map((y) => +$(`#h${i}_${y}`).value || 0);
 const asg = (hs, n) => {
   const l = Array(n).fill(0);
@@ -52,9 +54,32 @@ const minT = (h, L) => {
 SUB.forEach((s, i) =>
   $("#subs").insertAdjacentHTML(
     "beforeend",
-    `<tr><td>${s[0]}</td>${s[1].map((v, y) => `<td><input type=number min=0 max=10 value=${v} id=h${i}_${y} oninput=updateTotalsAndTeacherCards()></td>`).join("")}</tr>`,
+    `<tr id="subject-row-${i}"><td><div class="subject-name"><span>${s[0]}</span><button class="subject-toggle" type="button" onclick="toggleSubject(${i})" aria-label="إزالة ${s[0]} من البرنامج">إزالة</button></div></td>${s[1].map((v, y) => `<td><input type=number min=0 max=10 value=${v} id=h${i}_${y} oninput=updateTotalsAndTeacherCards()></td>`).join("")}</tr>`,
   ),
 );
+function toggleSubject(i) {
+  const row = $("#subject-row-" + i);
+  ACTIVE_SUBJECTS[i] = !ACTIVE_SUBJECTS[i];
+  row.classList.toggle("inactive", !ACTIVE_SUBJECTS[i]);
+  for (let y = 0; y < 4; y++) {
+    const input = $(`#h${i}_${y}`);
+    if (ACTIVE_SUBJECTS[i]) {
+      input.value = savedSubjectHours[i][y];
+      input.disabled = false;
+    } else {
+      savedSubjectHours[i][y] = +input.value || 0;
+      input.value = 0;
+      input.disabled = true;
+    }
+  }
+  const button = row.querySelector(".subject-toggle");
+  button.textContent = ACTIVE_SUBJECTS[i] ? "إزالة" : "إعادة تفعيل";
+  button.setAttribute(
+    "aria-label",
+    `${ACTIVE_SUBJECTS[i] ? "إزالة" : "إعادة تفعيل"} ${SUB[i][0]} ${ACTIVE_SUBJECTS[i] ? "من" : "في"} البرنامج`,
+  );
+  updateTotalsAndTeacherCards();
+}
 // -----------------------------------------------------------------------------
 // Subject hours and teacher cards
 // -----------------------------------------------------------------------------
@@ -267,6 +292,7 @@ function setTeacherAvailability(i, k, v) {
 function addSuggestedTeachers() {
   SUB.forEach((s, i) => {
     if (i == 8) return;
+    if (!hyT(i).some((hours) => hours > 0)) return;
     const m = mn(i);
     while (TN[i].length < m)
       TN[i].push(mk(`أستاذ ${s[0]} ${TN[i].length + 1}`));

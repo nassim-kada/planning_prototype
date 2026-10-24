@@ -69,6 +69,33 @@ td {
   text-align: center;
   font-size: 0.9rem;
 }
+.subject-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 150px;
+}
+.subject-toggle {
+  flex: none;
+  margin: 0;
+  padding: 3px 8px;
+  border: 1px solid var(--bd);
+  background: transparent;
+  color: var(--mut);
+  font-size: 0.75rem;
+}
+.subject-toggle:hover {
+  border-color: #d33;
+  color: #d33;
+}
+tr.inactive td {
+  opacity: 0.6;
+}
+tr.inactive .subject-toggle {
+  border-color: var(--ac);
+  color: var(--ac);
+}
 input {
   font: inherit;
   padding: 5px;
