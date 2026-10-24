@@ -18,7 +18,7 @@ const SUB = [
 ];
 const NS = SUB.length,
   CORE = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0];
-const LBL = (i) => (i == 6 ? "التاريخ والجغرافيا والتربية المدنية" : SUB[i][0]);
+const LBL = (i) => SUB[i][0];
 const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"];
 const PER = [
   "08:15 - 09:15",
@@ -210,6 +210,37 @@ const mk = (n) => ({
   cl: Array(8).fill(false),
   open: false,
 });
+// School staff defaults supplied by the user. This keeps the teacher list
+// prefilled between page reloads so names do not need to be entered again.
+const initialTeachers = {
+  0: ["Benaouda", "Aouali", "Dahmani"],
+  1: ["Doudou", "Amrouche"],
+  2: ["Saidi", "Allouche", "Bouchetout", "Iften"],
+  3: ["Maiza", "Sfihi", "Kaci"],
+  4: ["Bouhadjar", "Chafai"],
+  5: ["Yagoub", "Amari"],
+  6: ["Tikialine", "Chabouni", "Madanya"],
+  7: ["Hamici"],
+  10: ["Kernif", "Amrouni"],
+  11: ["Serir"],
+};
+Object.entries(initialTeachers).forEach(([subject, names]) => {
+  TN[subject] = names.map(mk);
+  TN[subject].forEach((teacher, index) => {
+    CL.forEach((_, classIndex) => {
+      if (subject !== "11" || classIndex < 6) {
+        if (classIndex % names.length === index) teacher.cl[classIndex] = true;
+      }
+    });
+  });
+});
+// These subjects were not requested; drawing is not taught in 4AM.
+toggleSubject(9);
+toggleSubject(8);
+$("#subject-row-9").hidden = true;
+$("#subject-row-8").hidden = true;
+$("#h11_3").value = 0;
+savedSubjectHours[11][3] = 0;
 // -----------------------------------------------------------------------------
 // Teacher management and modal controls
 // -----------------------------------------------------------------------------
