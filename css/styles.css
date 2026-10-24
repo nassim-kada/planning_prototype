@@ -1,0 +1,417 @@
+/* Theme and page foundation */
+:root {
+  --bg: #f6f7fb;
+  --fg: #1c2230;
+  --card: #fff;
+  --bd: #d5d9e4;
+  --ac: #1d5fd6;
+  --mut: #667;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171f;
+    --fg: #e8ebf3;
+    --card: #1e2330;
+    --bd: #38405a;
+    --ac: #6ea0ff;
+    --mut: #9aa3bb;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171f;
+  --fg: #e8ebf3;
+  --card: #1e2330;
+  --bd: #38405a;
+  --ac: #6ea0ff;
+  --mut: #9aa3bb;
+}
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: Cairo, Tahoma, Arial, sans-serif;
+}
+/* Main layout and input tables */
+.w {
+  max-width: 1050px;
+  margin: auto;
+  padding: 16px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+h1 {
+  font-size: 1.4rem;
+  margin: 0.2em 0;
+}
+h2 {
+  font-size: 1.05rem;
+}
+.sc {
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th,
+td {
+  border: 1px solid var(--bd);
+  padding: 6px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+input {
+  font: inherit;
+  padding: 5px;
+  border: 1px solid var(--bd);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  max-width: 100%;
+}
+input[type="number"] {
+  width: 58px;
+}
+.hint {
+  color: var(--mut);
+  font-size: 0.88rem;
+  margin: 0.2em 0 0.8em;
+}
+/* Teacher cards and availability controls */
+.tg {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(430px, 1fr));
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.tc {
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.th {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+}
+.bd {
+  margin-inline-start: auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 99px;
+}
+.bd.g {
+  background: #d9f5e3;
+  color: #116b38;
+}
+.bd.r {
+  background: #fde0e0;
+  color: #a31d1d;
+}
+.ch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 30px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 99px;
+  padding: 3px 6px 3px 12px;
+  font-size: 0.88rem;
+}
+.chip .x {
+  background: none;
+  color: var(--mut);
+  padding: 0 6px;
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.chip .x:hover {
+  color: #d33;
+}
+.em {
+  color: var(--mut);
+  font-size: 0.82rem;
+}
+.tl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tw {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.hd b {
+  flex: 1;
+}
+.sm {
+  margin: 0;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+}
+.hd .x {
+  background: none;
+  color: var(--mut);
+  padding: 0 8px;
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.hd .x:hover {
+  color: #d33;
+}
+.av {
+  border-collapse: collapse;
+  width: 100%;
+  user-select: none;
+}
+.av th,
+.av td {
+  padding: 4px 2px;
+  font-size: 0.75rem;
+}
+.hc {
+  cursor: pointer;
+  background: var(--card);
+}
+.hc:hover {
+  color: var(--ac);
+}
+.cell {
+  cursor: pointer;
+  touch-action: none;
+  font-weight: 700;
+  min-width: 62px;
+  font-size: 0.72rem !important;
+}
+.cell.on {
+  background: #d9f5e3;
+  color: #116b38;
+}
+.cell.off {
+  background: #fde0e0;
+  color: #a31d1d;
+}
+.brk td {
+  background: var(--card);
+  color: var(--mut);
+  font-size: 0.7rem;
+  padding: 2px;
+}
+.ab {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+/* Teacher settings modal */
+.md {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 12px;
+}
+.md[hidden] {
+  display: none;
+}
+.cg {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.cy {
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ck {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.ck input {
+  width: 18px;
+  height: 18px;
+}
+.mc {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 14px;
+  padding: 14px;
+  width: min(620px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+}
+.mh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.mh /* Actions, status messages, and generated timetables */
+button {
+  margin: 0;
+}
+.lg {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8rem;
+  align-items: center;
+}
+.lg i {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-inline-end: 4px;
+}
+.ad {
+  display: flex;
+  gap: 6px;
+}
+.ad input {
+  flex: 1;
+  min-width: 0;
+}
+.ad button {
+  margin: 0;
+  padding: 6px 14px;
+}
+textarea {
+  font: inherit;
+  padding: 5px;
+  border: 1px solid var(--bd);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  width: 180px;
+  resize: vertical;
+}
+button {
+  font: inherit;
+  background: var(--ac);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 16px;
+  cursor: pointer;
+  margin: 4px;
+}
+button.s {
+  background: transparent;
+  color: var(--ac);
+  border: 1px solid var(--ac);
+}
+.err {
+  color: #d33;
+  font-weight: 700;
+  white-space: pre-line;
+}
+.ok {
+  color: #1a8a4a;
+  font-weight: 700;
+}
+.tt td {
+  height: 54px;
+  color: #111;
+  min-width: 96px;
+}
+.tt small {
+  color: #333;
+}
+.br td {
+  background: var(--bg);
+  height: auto;
+  color: var(--mut);
+  font-size: 0.8rem;
+}
+.sheet {
+  margin-bottom: 22px;
+}
+#out {
+  display: none;
+}
+/* Printable student and teacher schedules */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+  #out {
+    display: block;
+  }
+  html,
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .no {
+    display: none !important;
+  }
+  .sheet {
+    page-break-after: always;
+    margin: 0;
+  }
+  .tt th {
+    background: #eee;
+    color: #000;
+  }
+  .tt td {
+    height: 15mm;
+  }
+  .br td {
+    background: #f3f3f3;
+    color: #333;
+  }
+  body.pc .sheet[data-k="t"],
+  body.pt .sheet[data-k="c"] {
+    display: none;
+  }
+}

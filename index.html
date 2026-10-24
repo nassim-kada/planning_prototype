@@ -1,232 +1,104 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>مولّد الجداول الدراسية</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#f6f7fb;--fg:#1c2230;--card:#fff;--bd:#d5d9e4;--ac:#1d5fd6;--mut:#667;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171f;--fg:#e8ebf3;--card:#1e2330;--bd:#38405a;--ac:#6ea0ff;--mut:#9aa3bb}}
-:root[data-theme="dark"]{--bg:#14171f;--fg:#e8ebf3;--card:#1e2330;--bd:#38405a;--ac:#6ea0ff;--mut:#9aa3bb}
-html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Cairo,Tahoma,Arial,sans-serif}
-.w{max-width:1050px;margin:auto;padding:16px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
-h1{font-size:1.4rem;margin:.2em 0}h2{font-size:1.05rem}
-.sc{overflow-x:auto}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid var(--bd);padding:6px;text-align:center;font-size:.9rem}
-input{font:inherit;padding:5px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);max-width:100%}
-input[type=number]{width:58px}
-.hint{color:var(--mut);font-size:.88rem;margin:.2em 0 .8em}
-.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:12px;margin-bottom:10px}
-.tc{border:1px solid var(--bd);border-radius:12px;padding:12px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
-.th{display:flex;align-items:center;gap:8px}
-.dot{width:12px;height:12px;border-radius:50%;flex:none}
-.bd{margin-inline-start:auto;font-size:.8rem;font-weight:700;padding:2px 10px;border-radius:99px}
-.bd.g{background:#d9f5e3;color:#116b38}.bd.r{background:#fde0e0;color:#a31d1d}
-.ch{display:flex;flex-wrap:wrap;gap:6px;min-height:30px}
-.chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:99px;padding:3px 6px 3px 12px;font-size:.88rem}
-.chip .x{background:none;color:var(--mut);padding:0 6px;margin:0;font-size:1.1rem;line-height:1}
-.chip .x:hover{color:#d33}
-.em{color:var(--mut);font-size:.82rem}
-.tl{display:flex;flex-direction:column;gap:8px}
-.tw{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
-.hd{display:flex;align-items:center;gap:6px}.hd b{flex:1}
-.sm{margin:0;padding:3px 10px;font-size:.8rem}
-.hd .x{background:none;color:var(--mut);padding:0 8px;margin:0;font-size:1.2rem;line-height:1}.hd .x:hover{color:#d33}
-.av{border-collapse:collapse;width:100%;user-select:none}
-.av th,.av td{padding:4px 2px;font-size:.75rem}
-.hc{cursor:pointer;background:var(--card)}.hc:hover{color:var(--ac)}
-.cell{cursor:pointer;touch-action:none;font-weight:700;min-width:62px;font-size:.72rem!important}
-.cell.on{background:#d9f5e3;color:#116b38}.cell.off{background:#fde0e0;color:#a31d1d}
-.brk td{background:var(--card);color:var(--mut);font-size:.7rem;padding:2px}
-.ab{display:flex;gap:6px;flex-wrap:wrap}
-.md{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:12px}
-.md[hidden]{display:none}
-.cg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px}
-.cy{border:1px solid var(--bd);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px}
-.ck{display:flex;align-items:center;gap:8px;cursor:pointer}.ck input{width:18px;height:18px}
-.mc{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;width:min(620px,100%);max-height:92vh;overflow:auto}
-.mh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.mh button{margin:0}
-.lg{display:flex;gap:12px;font-size:.8rem;align-items:center}.lg i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:middle;margin-inline-end:4px}
-.ad{display:flex;gap:6px}.ad input{flex:1;min-width:0}.ad button{margin:0;padding:6px 14px}
-textarea{font:inherit;padding:5px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);width:180px;resize:vertical}
-button{font:inherit;background:var(--ac);color:#fff;border:0;border-radius:8px;padding:9px 16px;cursor:pointer;margin:4px}
-button.s{background:transparent;color:var(--ac);border:1px solid var(--ac)}
-.err{color:#d33;font-weight:700;white-space:pre-line}.ok{color:#1a8a4a;font-weight:700}
-.tt td{height:54px;color:#111;min-width:96px}.tt small{color:#333}
-.br td{background:var(--bg);height:auto;color:var(--mut);font-size:.8rem}
-.sheet{margin-bottom:22px}
-#out{display:none}
-@media print{@page{size:A4 landscape;margin:10mm}
-#out{display:block}
-html,body{background:#fff;color:#000}.no{display:none!important}
-.sheet{page-break-after:always;margin:0}.tt th{background:#eee;color:#000}.tt td{height:15mm}
-.br td{background:#f3f3f3;color:#333}
-body.pc .sheet[data-k=t],body.pt .sheet[data-k=c]{display:none}}
-</style></head><body><div class="w">
-<div class="no">
-<h1>مولّد جدول التوقيت للمؤسسة الخاصة</h1>
-<div class="card">
-<label>اسم المؤسسة: <input id="sch" value="المؤسسة الخاصة" size="24"></label>
-<label> السنة الدراسية: <input id="yr" value="2026/2027" size="10"></label>
-<label> أقصى حجم ساعي أسبوعي للأستاذ: <input type="number" id="ml" value="22" min="1" max="35"></label>
-<p style="color:var(--mut);font-size:.85rem">8 أقسام (4 سنوات × قسمان) — الأسبوع من الأحد إلى الخميس — 7 حصص يوميا (4 صباحا + 3 مساء) — الأستاذ لا يدرّس أكثر من ساعتين في اليوم للقسم الواحد.</p>
-<div class="sc"><table><thead><tr><th>المادة</th><th>أولى متوسط</th><th>ثانية متوسط</th><th>ثالثة متوسط</th><th>رابعة متوسط</th></tr></thead>
-<tbody id="subs"></tbody><tfoot><tr><th>المجموع الأسبوعي</th><th id="t0"></th><th id="t1"></th><th id="t2"></th><th id="t3"></th></tr></tfoot></table></div>
-</div>
-<div class="card"><h2>أسماء الأساتذة</h2>
-<p class="hint">أضف أساتذة كل مادة: اكتب الاسم ثم اضغط «إضافة». لكل أستاذ زر «تخصيص الأوقات» يفتح نافذة تحتوي جدولا بالساعات الفعلية (من 08:15 إلى 16:15) لتحديد الأوقات المتاحة (أخضر) وأوقات عدم التوفر (أحمر) بدقة، ويمكن تعديله في أي وقت. الشارة الخضراء تعني أن العدد كافٍ، والحمراء تعني أنه ينقص أساتذة.</p>
-<div id="tg" class="tg"></div>
-<button class="s" onclick="sug()">إضافة أساتذة افتراضيين للأعداد الناقصة</button>
-<button onclick="go()">توليد الجدول</button>
-<div id="msg"></div>
-</div></div>
-<div id="md" class="no md" hidden onclick="if(event.target===this)cm()"><div class="mc"><div class="mh"><b id="mt"></b><button onclick="cm()">تم</button></div><div id="mb"></div></div></div>
-<div id="out"></div>
-<div class="no" id="pb" hidden><button onclick="dl('c')">تحميل جدول التلاميذ (PDF)</button><button onclick="dl('t')">تحميل جدول الأساتذة (PDF)</button> <small style="color:var(--mut)">في نافذة الطباعة اختر «حفظ بصيغة PDF»</small></div>
-</div>
-<script>
-// الحجم الساعي الأسبوعي لكل مادة: [أولى، ثانية، ثالثة، رابعة] متوسط
-const SUB=[["اللغة العربية",[5,5,4,4]],["الرياضيات",[4,4,4,4]],["اللغة الفرنسية",[3,3,4,4]],["اللغة الإنجليزية",[3,3,4,4]],["علوم الطبيعة والحياة",[2,2,2,2]],["العلوم الفيزيائية والتكنولوجيا",[2,2,2,2]],["التاريخ والجغرافيا",[2,2,2,2]],["التربية الإسلامية",[1,1,1,1]],["التربية المدنية",[1,1,1,1]],["الإعلام الآلي",[1,1,1,1]],["التربية البدنية والرياضية",[2,2,2,2]],["التربية الفنية التشكيلية",[1,1,1,1]]];
-const NS=SUB.length,CORE=[1,1,1,1,1,1,0,0,0,0,0,0];
-const LBL=i=>i==6?'التاريخ والجغرافيا والتربية المدنية':SUB[i][0];
-const DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس"];
-const PER=["08:15 - 09:15","09:15 - 10:15","10:30 - 11:30","11:30 - 12:30","13:15 - 14:15","14:15 - 15:15","15:15 - 16:15"];
-const Y=["أولى","ثانية","ثالثة","رابعة"];
-const CL=[];Y.forEach(y=>[1,2].forEach(k=>CL.push(`${y} متوسط - القسم ${k}`)));
-const $=s=>document.querySelector(s);
-const hy=i=>[0,1,2,3].map(y=>+$(`#h${i}_${y}`).value||0);
-const asg=(hs,n)=>{const l=Array(n).fill(0);[...hs].sort((a,b)=>b-a).forEach(x=>{l[l.indexOf(Math.min(...l))]+=x});return Math.max(...l)};
-const minT=(h,L)=>{const hs=h.flatMap(x=>[x,x]).filter(x=>x>0);if(!hs.length)return 0;for(let n=1;n<=8;n++)if(asg(hs,n)<=L)return n;return 8};
-SUB.forEach((s,i)=>$('#subs').insertAdjacentHTML('beforeend',`<tr><td>${s[0]}</td>${s[1].map((v,y)=>`<td><input type=number min=0 max=10 value=${v} id=h${i}_${y} oninput=upd()></td>`).join('')}</tr>`));
-function upd(){const L=+$('#ml').value||24;
- rt();
- for(let y=0;y<4;y++){const t=SUB.reduce((a,_,i)=>a+hy(i)[y],0);const e=$('#t'+y);e.textContent=t+' ساعة';e.style.color=t>35?'#d33':''}}
-$('#ml').oninput=upd;
-const TN=SUB.map(()=>[]);
-const esc=t=>t.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const hyT=i=>i==6?hy(6).map((v,y)=>v+hy(8)[y]):hy(i);
-const mn=i=>minT(hyT(i),+$('#ml').value||24);
-const rngs=t=>{const p=[];for(let d=0;d<5;d++){const r=[];let s=0;while(s<7){if(t.off[d*7+s]){let e=s;while(e+1<7&&t.off[d*7+e+1])e++;r.push(s==0&&e==6?'طوال اليوم':PER[s].split(' - ')[0]+' إلى '+PER[e].split(' - ')[1]);s=e+1}else s++}
- if(r.length)p.push(DAYS[d]+': '+r.join(' و '))}return p};
-function grid(i,k,t){
- let h=`<div class="gw" data-i="${i}" data-k="${k}"><div class="lg"><span><i style="background:#d9f5e3"></i>متاح للتدريس</span><span><i style="background:#fde0e0"></i>غير متاح (لا تُبرمج له حصص)</span></div><table class="av"><tr><th>الوقت</th>${DAYS.map((d,x)=>`<th class="hc" onclick="td(${i},${k},${x})">${d}</th>`).join('')}</tr>`;
- PER.forEach((p,s)=>{h+=`<tr><th class="hc" onclick="tp(${i},${k},${s})">${p}</th>`+DAYS.map((_,d)=>{const o=t.off[d*7+s];return `<td class="cell ${o?'off':'on'}" data-x="${d*7+s}">${o?'غير متاح':'متاح'}</td>`}).join('')+'</tr>';
-  if(s==1)h+='<tr class="brk"><td colspan="6">استراحة 10:15 - 10:30</td></tr>';
-  if(s==3)h+='<tr class="brk"><td colspan="6">فترة الغداء 12:30 - 13:15</td></tr>'});
- return h+`</table><div class="ab"><button class="s sm" onclick="ta(${i},${k},false)">الكل متاح</button><button class="s sm" onclick="ta(${i},${k},true)">الكل غير متاح</button></div><div class="em">انقر على أي خانة لتبديلها أو اسحب لتلوين عدة خانات. انقر على اسم اليوم أو على الوقت لتبديل العمود أو الصف كاملا.</div></div>`}
-const csum=t=>{const n=t.cl.filter(x=>x).length;return n==8?'كل الأقسام (يوزّعها البرنامج تلقائيا إن وُجد أكثر من أستاذ)':n==0?'لا قسم محدد (لن تُبرمج له حصص)':CL.filter((_,c)=>t.cl[c]).join('، ')};
-function cgrid(i,k,t){return `<div class="cg">${Y.map((y,yy)=>`<div class="cy"><b>${y} متوسط</b>${[0,1].map(q=>{const c=yy*2+q;return `<label class="ck"><input type="checkbox" ${t.cl[c]?'checked':''} onchange="sc(${i},${k},${c},this.checked)">القسم ${q+1}</label>`}).join('')}</div>`).join('')}</div><div class="ab"><button class="s sm" onclick="ca(${i},${k},true)">كل الأقسام</button><button class="s sm" onclick="ca(${i},${k},false)">بدون أقسام</button></div><div class="em">حدّد الأقسام التي يدرّس لها هذا الأستاذ مادته. إذا كان للمادة أكثر من أستاذ فوزّع الأقسام بينهم (مثلا أستاذ للسنتين الأولى والثانية وآخر للثالثة والرابعة). وإن تركتَ كل الأقسام محددة يوزّعها البرنامج تلقائيا.</div>`}
-function sc(i,k,c,v){TN[i][k].cl[c]=v;rt()}
-function ca(i,k,v){TN[i][k].cl.fill(v);rf()}
-function trow(i,k,t){
- const o=rngs(t);
- return `<div class="tw"><div class="hd"><b>${esc(t.n)}</b><button class="s sm" onclick="om(${i},${k},'c')">الأقسام</button><button class="s sm" onclick="om(${i},${k},'a')">تخصيص الأوقات</button><button class="x" onclick="del(${i},${k})" aria-label="حذف">×</button></div><div class="em">الأقسام: ${csum(t)}</div><div class="em">${o.length?'غير متاح — '+o.join(' | '):'متاح طوال الأسبوع'}</div></div>`}
-function rt(){
- $('#tg').innerHTML=SUB.map((s,i)=>{
-  if(i==8||!hyT(i).some(x=>x))return '';
-  const m=mn(i),n=TN[i].length;
-  return `<div class="tc"><div class="th"><span class="dot" style="background:hsl(${i*27} 70% 60%)"></span><b>${LBL(i)}</b><span class="bd ${n>=m?'g':'r'}">${n} من ${m} أستاذ</span></div>
-  <div class="tl">${TN[i].map((t,k)=>trow(i,k,t)).join('')||'<span class="em">لم يُضف أي أستاذ بعد</span>'}</div>
-  <div class="ad"><input id="in${i}" placeholder="اسم الأستاذ" onkeydown="if(event.key==='Enter'){event.preventDefault();add(${i})}"><button onclick="add(${i})">إضافة</button></div></div>`}).join('')}
-const mk=n=>({n,off:Array(35).fill(false),cl:Array(8).fill(true),open:false});
-function add(i){const v=$('#in'+i).value.split(/[,،\n]/).map(x=>x.trim()).filter(Boolean);if(!v.length)return;TN[i].push(...v.map(mk));rt();$('#in'+i).focus()}
-function del(i,k){TN[i].splice(k,1);rt()}
-let MD=null;
-function om(i,k,m){MD={i,k,m};rm()}
-function cm(){MD=null;rm();rt()}
-function rm(){const m=$('#md');if(!MD){m.hidden=true;return}const t=TN[MD.i][MD.k];m.hidden=false;$('#mt').textContent=(MD.m=='c'?'الأقسام التي يدرّسها الأستاذ: ':'تخصيص أوقات الأستاذ: ')+t.n+' ('+LBL(MD.i)+')';$('#mb').innerHTML=MD.m=='c'?cgrid(MD.i,MD.k,t):grid(MD.i,MD.k,t)}
-const rf=()=>{rt();rm()};
-addEventListener('keydown',e=>{if(e.key==='Escape'&&MD)cm()});
-const flip=(t,ix)=>{const v=!ix.every(x=>t.off[x]);ix.forEach(x=>t.off[x]=v)};
-function td(i,k,d){flip(TN[i][k],[0,1,2,3,4,5,6].map(s=>d*7+s));rf()}
-function tp(i,k,s){flip(TN[i][k],[0,1,2,3,4].map(d=>d*7+s));rf()}
-function ta(i,k,v){TN[i][k].off.fill(v);rf()}
-function sug(){SUB.forEach((s,i)=>{if(i==8)return;const m=mn(i);while(TN[i].length<m)TN[i].push(mk(`أستاذ ${s[0]} ${TN[i].length+1}`))});rt()}
-let pt=null;
-const setc=(c,x)=>{TN[pt.i][pt.k].off[x]=pt.v;c.className='cell '+(pt.v?'off':'on');c.textContent=pt.v?'غير متاح':'متاح'};
-$('#md').addEventListener('pointerdown',e=>{const c=e.target.closest('.cell');if(!c)return;const g=c.closest('.gw'),i=+g.dataset.i,k=+g.dataset.k,x=+c.dataset.x;pt={i,k,v:!TN[i][k].off[x]};setc(c,x);e.preventDefault()});
-$('#md').addEventListener('pointermove',e=>{if(!pt)return;const el=document.elementFromPoint(e.clientX,e.clientY),c=el&&el.closest('.cell');if(!c)return;const g=c.closest('.gw');if(+g.dataset.i!==pt.i||+g.dataset.k!==pt.k)return;setc(c,+c.dataset.x)});
-addEventListener('pointerup',()=>{if(pt){pt=null;rf()}});
-upd();
-const msg=(t,c='err')=>{$('#msg').innerHTML=`<p class="${c}">${t}</p>`;return 0};
-const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-function go(){
- const L=+$('#ml').value||24,HY=SUB.map((_,i)=>hy(i));
- const hc=CL.map((_,c)=>HY.map(h=>h[c>>1])),Hc=hc.map(a=>a.reduce((x,y)=>x+y,0)),hT=hc.map(a=>a.map((v,i)=>i==6?v+a[8]:v)),HYT=HY.map((h,i)=>i==6?h.map((v,y)=>v+HY[8][y]):h);
- if(Hc.some(x=>x<1||x>35))return msg('مجموع الساعات الأسبوعية لكل سنة يجب أن يكون بين 1 و 35');
- const len=Hc.map(H=>[0,1,2,3,4].map(d=>Math.floor(H/5)+(d<H%5?1:0)));
- const T=[],ts=SUB.map(()=>[]);
- SUB.forEach((sb,i)=>{if(i==8||!HYT[i].some(x=>x))return;TN[i].forEach(o=>{const t={name:o.n,sub:i,load:0,id:T.length,off:o.off.slice(),cl:o.cl.slice(),av:o.off.filter(v=>!v).length};T.push(t);ts[i].push(t)})});
- const bad=[];SUB.forEach((sb,i)=>{if(i!=8&&HYT[i].some(x=>x)&&ts[i].length<minT(HYT[i],L))bad.push(`${LBL(i)}: المطلوب ${minT(HYT[i],L)} على الأقل، المُدخل ${ts[i].length}`)});
- if(bad.length)return msg('عدد الأساتذة غير كافٍ:\n'+bad.join('\n'));
- const errs=[];
- for(let d=0;d<5;d++){const w=[];for(let s=0;s<7;s++){const act=CL.filter((_,c)=>s<len[c][d]).length,av=T.filter(t=>!t.off[d*7+s]).length;if(av<act)w.push(`${PER[s]} (يلزم ${act} أساتذة والمتاحون ${av})`)}
-  if(w.length)errs.push(`يوم ${DAYS[d]}: عدد الأساتذة المتاحين أقل من عدد الأقسام التي تدرس في وقت واحد، في الحصص: ${w.join('، ')}. قلّل أوقات عدم التوفر في هذه الأوقات أو أضف أساتذة.`)}
- const feas=(t,c)=>{let m=0;for(let d=0;d<5;d++){const ok=[];for(let s=0;s<len[c][d];s++)ok.push(!t.off[d*7+s]);let b=ok.some(x=>x)?1:0;for(let s=0;s+1<ok.length;s++)if(ok[s]&&ok[s+1]&&s!==3)b=2;m+=b}return m};
- const cap=t=>Math.min(L,t.av)-t.load;
- const tOf=CL.map(()=>[]),cls={};
- SUB.forEach((sb,i)=>{if(i==8||!ts[i].length)return;
-  [...CL.keys()].filter(c=>hT[c][i]>0).sort((a,b)=>ts[i].filter(t=>t.cl[a]).length-ts[i].filter(t=>t.cl[b]).length||hT[b][i]-hT[a][i]).forEach(c=>{
-   const h=hT[c][i],cd=ts[i].filter(t=>t.cl[c]);
-   if(!cd.length){const k=`مادة «${LBL(i)}»: لا يوجد أستاذ مُعيَّن للأقسام التالية (استعمل زر «الأقسام» عند الأستاذ): `;(cls[k]=cls[k]||[]).push(CL[c]);return}
-   const ok=cd.filter(t=>feas(t,c)>=h&&cap(t)>=h);
-   if(!ok.length){const fe=cd.filter(t=>feas(t,c)>=h);
-    if(!fe.length){const b=cd.reduce((a,t)=>feas(t,c)>feas(a,c)?t:a),k=`مادة «${LBL(i)}» تحتاج ${h} ساعة أسبوعيا لكل قسم (بحد أقصى ساعتان يوميا)، بينما لا تسمح أوقات عدم توفر أساتذتها إلا بـ ${feas(b,c)} ساعة كحد أقصى (الأقرب: ${b.name})، وذلك في الأقسام: `;(cls[k]=cls[k]||[]).push(CL[c])}
-    else errs.push(`مادة «${LBL(i)}»: الأساتذة المُعيَّنون للقسم «${CL[c]}» لا يكفي حجمهم الساعي (الحد الأقصى ${L} ساعة وأوقات عدم التوفر). وزّع الأقسام على أساتذة آخرين أو أضف أستاذا.`);return}
-   const t=ok.reduce((a,b)=>cap(b)>cap(a)?b:a);t.load+=h;tOf[c][i]=t.id;if(i==6)tOf[c][8]=t.id})});
- errs.push(...Object.entries(cls).map(([k,v])=>k+v.join('، ')+'.'));
- if(errs.length)return msg('لا يمكن إنجاز الجدول للأسباب التالية:\n'+[...new Set(errs)].join('\n'));
- msg('جاري التوليد...','ok');
- setTimeout(()=>{
-  const t0=performance.now();let grid=null;
-  while(!grid&&performance.now()-t0<25000){
-   const slots=[];for(let d=0;d<5;d++)for(let s=0;s<7;s++){const act=CL.map((_,c)=>c).filter(c=>s<len[c][d]);if(act.length)slots.push([d,s,act])}
-   const g=CL.map(()=>Array.from({length:5},()=>Array(7).fill(-1))),rem=hc.map(a=>a.slice()),
-    busy=T.map(()=>Array.from({length:5},()=>Array(7).fill(0))),dc=CL.map(()=>Array.from({length:5},()=>Array(NS).fill(0))),dt=T.map(()=>CL.map(()=>Array(5).fill(0)));
-   const tr=T.map(()=>0);CL.forEach((_,c)=>SUB.forEach((_,i)=>{if(hc[c][i]>0)tr[tOf[c][i]]+=hc[c][i]}));
-   const avF=T.map(t=>{const a=Array(slots.length+1).fill(0);for(let k=slots.length-1;k>=0;k--)a[k]=a[k+1]+(t.off[slots[k][0]*7+slots[k][1]]?0:1);return a});
-   let nodes=0;
-   const cands=(c,d,s,si)=>{const r=[];
-    for(let i=0;i<NS;i++){if(rem[c][i]<=0)continue;const n=dc[c][d][i],tid=tOf[c][i];if(n>=2||dt[tid][c][d]>=2)continue;
-     const bt=busy[tid][d];if(bt[s]||T[tid].off[d*7+s])continue;
-     if(s>0&&!bt[s-1]){let e=0;for(let k=s<4?0:4;k<s;k++)if(bt[k]){e=1;break}if(e)continue}
-     if(n==1&&(s==0||s==4||g[c][d][s-1]!=i))continue;
-     r.push([tr[tid]/Math.max(1,avF[tid][si])*6+rem[c][i]*2/(5-d)+rem[c][i]*.3+(CORE[i]&&s<4?1:0)+(s>0&&bt[s-1]?1.5:0)+Math.random()*2,i])}
-    return r.sort((a,b)=>b[0]-a[0])};
-   const fill=(si,left)=>{
-    if(!left.length)return rec(si+1);
-    const[d,s]=slots[si];let bc=-1,best=null;
-    for(const c of left){const cd=cands(c,d,s,si);if(!cd.length)return false;if(!best||cd.length<best.length){best=cd;bc=c}}
-    if(++nodes>20000)throw 0;
-    const nl=left.filter(x=>x!==bc);
-    for(const[,i]of best){const t=tOf[bc][i];g[bc][d][s]=i;rem[bc][i]--;dc[bc][d][i]++;dt[t][bc][d]++;tr[t]--;busy[t][d][s]=1;
-     if(fill(si,nl))return true;
-     g[bc][d][s]=-1;rem[bc][i]++;dc[bc][d][i]--;dt[t][bc][d]--;tr[t]++;busy[t][d][s]=0}
-    return false};
-   const rec=si=>{
-    if(si==slots.length)return true;
-    const[d,s]=slots[si];
-    for(let t=0;t<T.length;t++)if(tr[t]>avF[t][si])return false;
-    if(s==0)for(let c=0;c<8;c++)for(let i=0;i<NS;i++)if(rem[c][i]>2*(5-d))return false;
-    return fill(si,slots[si][2].slice())};
-   try{if(rec(0))grid=g}catch(e){}
-  }
-  if(!grid){const w=SUB.map((sb,i)=>{const D=hT.reduce((a,x)=>a+x[i],0),cp=ts[i].reduce((a,t)=>a+Math.min(L,t.av),0);return{sb:[LBL(i)],D,cp,r:cp?D/cp:0,i}}).filter(x=>x.D>0&&x.i!=8).sort((a,b)=>b.r-a.r)[0];
-   return msg(`لا يمكن إنجاز الجدول مع كل الشروط (لا انقطاع للأستاذ، ساعتان كحد أقصى يوميا لكل قسم، وأوقات عدم التوفر). السبب الأرجح: مادة «${w.sb[0]}» تحتاج ${w.D} ساعة أسبوعيا بينما يغطي أساتذتها ${w.cp} ساعة فقط، فلا تتسع حصصها في الأوقات المتاحة. أضف أستاذا لهذه المادة أو قلّل أوقات عدم التوفر ثم أعد المحاولة.`)}
-  render(grid,T,tOf);msg('تم توليد الجدول بنجاح ✔ — '+T.length+' أستاذ','ok')},30)}
-function dl(k){document.body.className='p'+k;const done=()=>{document.body.className='';removeEventListener('afterprint',done)};addEventListener('afterprint',done);print()}
-function render(g,T,tOf){window.LAST={g,T,tOf};
- const sc=$('#sch').value,yr=$('#yr').value;
- const tbl=(k,title,f)=>{let r=`<div class="sheet" data-k="${k}"><h2>${sc} — ${yr}<br>${title}</h2><div class="sc"><table class="tt"><tr><th>الحصة</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}</tr>`;
-  PER.forEach((p,s)=>{r+=`<tr><th>${p}</th>`+DAYS.map((_,d)=>f(d,s)||'<td></td>').join('')+'</tr>';
-   if(s==1)r+='<tr class="br"><td colspan="6">استراحة 10:15 - 10:30</td></tr>';
-   if(s==3)r+='<tr class="br"><td colspan="6">فترة الغداء 12:30 - 13:15</td></tr>'});
-  return r+'</table></div></div>'};
- const col=i=>`style="background:hsl(${i*27} 70% 88%)"`;
- let o='';
- CL.forEach((n,c)=>o+=tbl('c',n,(d,s)=>{const i=g[c][d][s];return i<0?'':`<td ${col(i)}><b>${SUB[i][0]}</b><br><small>${T[tOf[c][i]].name}</small></td>`}));
- T.forEach(t=>o+=tbl('t',`الأستاذ: ${t.name} (${LBL(t.sub)}) — ${t.load} ساعة أسبوعيا`,(d,s)=>{
-  for(let c=0;c<8;c++){const i=g[c][d][s];if(i>=0&&tOf[c][i]==t.id)return `<td ${col(i)}><b>${CL[c]}</b><br><small>${SUB[i][0]}</small></td>`}return t.off[d*7+s]?'<td style="background:#e6e6e6;color:#666">غير متاح</td>':''}));
- $('#out').innerHTML=o;$('#pb').hidden=false}
-</script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>مولّد الجداول الدراسية</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="w">
+      <div class="no">
+        <h1>مولّد جدول التوقيت للمؤسسة الخاصة</h1>
+        <div class="card">
+          <label
+            >اسم المؤسسة: <input id="sch" value="المؤسسة الخاصة" size="24"
+          /></label>
+          <label>
+            السنة الدراسية: <input id="yr" value="2026/2027" size="10"
+          /></label>
+          <label>
+            أقصى حجم ساعي أسبوعي للأستاذ:
+            <input type="number" id="ml" value="22" min="1" max="35"
+          /></label>
+          <p style="color: var(--mut); font-size: 0.85rem">
+            8 أقسام (4 سنوات × قسمان) — الأسبوع من الأحد إلى الخميس — 7 حصص
+            يوميا (4 صباحا + 3 مساء).
+          </p>
+          <div class="sc">
+            <table>
+              <thead>
+                <tr>
+                  <th>المادة</th>
+                  <th>أولى متوسط</th>
+                  <th>ثانية متوسط</th>
+                  <th>ثالثة متوسط</th>
+                  <th>رابعة متوسط</th>
+                </tr>
+              </thead>
+              <tbody id="subs"></tbody>
+              <tfoot>
+                <tr>
+                  <th>المجموع الأسبوعي</th>
+                  <th id="t0"></th>
+                  <th id="t1"></th>
+                  <th id="t2"></th>
+                  <th id="t3"></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h2>أسماء الأساتذة</h2>
+          <p class="hint">
+            أضف أساتذة كل مادة: اكتب الاسم ثم اضغط «إضافة». عند إضافته في
+            العربية أو التربية الإسلامية سيظهر تلقائيا في المادتين كأستاذ واحد،
+            مع بقاء المادتين منفصلتين في الجدول. لكل أستاذ زر «تخصيص
+            الأوقات» يفتح نافذة تحتوي جدولا بالساعات الفعلية (من 08:15 إلى
+            16:15) لتحديد الأوقات المتاحة (أخضر) وأوقات عدم التوفر (أحمر) بدقة،
+            ويمكن تعديله في أي وقت. الشارة الخضراء تعني أن العدد كافٍ، والحمراء
+            تعني أنه ينقص أساتذة. تعديل الأوقات أو الأقسام في بطاقة هذا الأستاذ
+            يطبق على المادتين، ولا يمكن جدولة حصتيهما في الوقت نفسه.
+          </p>
+          <div id="tg" class="tg"></div>
+          <button class="s" onclick="addSuggestedTeachers()">
+            إضافة أساتذة افتراضيين للأعداد الناقصة
+          </button>
+          <button onclick="generateTimetable()">توليد الجدول</button>
+          <div id="msg"></div>
+        </div>
+      </div>
+      <div
+        id="md"
+        class="no md"
+        hidden
+        onclick="if (event.target === this) closeTeacherModal();"
+      >
+        <div class="mc">
+          <div class="mh">
+            <b id="mt"></b><button onclick="closeTeacherModal()">تم</button>
+          </div>
+          <div id="mb"></div>
+        </div>
+      </div>
+      <div id="out"></div>
+      <div class="no" id="pb" hidden>
+        <button onclick="downloadPdf('c')">تحميل جدول التلاميذ (PDF)</button
+        ><button onclick="downloadPdf('t')">تحميل جدول الأساتذة (PDF)</button>
+        <small style="color: var(--mut)"
+          >في نافذة الطباعة اختر «حفظ بصيغة PDF»</small
+        >
+      </div>
+    </div>
+    <script src="js/app.js"></script>
+    <script src="js/scheduler.js"></script>
+  </body>
+</html>
