@@ -131,24 +131,38 @@ const summarizeTeacherClasses = (t) => {
       : CL.filter((_, c) => t.cl[c]).join("، ");
 };
 function renderClassAssignmentGrid(i, k, t) {
+  const takenByOthers = new Set(
+    TN[i].flatMap((teacher, index) =>
+      index === k ? [] : teacher.cl.flatMap((assigned, c) => assigned ? [c] : []),
+    ),
+  );
   return `<div class="cg">${Y.map(
     (y, yy) =>
       `<div class="cy"><b>${y} متوسط</b>${[0, 1]
         .map((q) => {
           const c = yy * 2 + q;
-          return `<label class="ck"><input type="checkbox" ${t.cl[c] ? "checked" : ""} onchange="setTeacherClassAssignment(${i},${k},${c},this.checked)">القسم ${q + 1}</label>`;
+          const unavailable = takenByOthers.has(c);
+          return `<label class="ck ${unavailable ? "disabled" : ""}"><input type="checkbox" ${t.cl[c] ? "checked" : ""} ${unavailable ? "disabled" : ""} onchange="setTeacherClassAssignment(${i},${k},${c},this.checked)">القسم ${q + 1}${unavailable ? " — مُسنَد" : ""}</label>`;
         })
         .join("")}</div>`,
   ).join(
     "",
-  )}</div><div class="ab"><button class="s sm" onclick="setTeacherClassAssignments(${i},${k},true)">كل الأقسام</button><button class="s sm" onclick="setTeacherClassAssignments(${i},${k},false)">بدون أقسام</button></div><div class="em">حدّد الأقسام التي يدرّس لها هذا الأستاذ مادته. إذا كان للمادة أكثر من أستاذ فوزّع الأقسام بينهم (مثلا أستاذ للسنتين الأولى والثانية وآخر للثالثة والرابعة). وإن تركتَ كل الأقسام محددة يوزّعها البرنامج تلقائيا.</div>`;
+  )}</div><div class="ab"><button class="s sm" onclick="setTeacherClassAssignments(${i},${k},true)">كل الأقسام المتاحة</button><button class="s sm" onclick="setTeacherClassAssignments(${i},${k},false)">إلغاء التحديد</button></div><div class="em">الأقسام المسندة إلى أستاذ آخر في هذه المادة غير متاحة للاختيار. أزل التحديد عن قسم من الأستاذ الآخر لإتاحته هنا.</div>`;
 }
 function setTeacherClassAssignment(i, k, c, v) {
+  if (v && TN[i].some((teacher, index) => index !== k && teacher.cl[c])) return;
   TN[i][k].cl[c] = v;
-  renderTeacherCards();
+  refreshTeacherViews();
 }
 function setTeacherClassAssignments(i, k, v) {
-  TN[i][k].cl.fill(v);
+  const taken = new Set(
+    TN[i].flatMap((teacher, index) =>
+      index === k ? [] : teacher.cl.flatMap((assigned, c) => assigned ? [c] : []),
+    ),
+  );
+  TN[i][k].cl = TN[i][k].cl.map((assigned, c) =>
+    v ? assigned || !taken.has(c) : false,
+  );
   refreshTeacherViews();
 }
 function renderTeacherCard(i, k, t) {
@@ -157,14 +171,10 @@ function renderTeacherCard(i, k, t) {
 }
 function renderTeacherCards() {
   $("#tg").innerHTML = SUB.map((s, i) => {
-    if (i == 8 || i == 7 || !hyT(i).some((x) => x)) return "";
-    const pairedCore = i === 0;
-    const m = pairedCore ? Math.max(mn(0), mn(7)) : mn(i),
+    if (i == 8 || !hyT(i).some((x) => x)) return "";
+    const m = mn(i),
       n = TN[i].length;
-    const subjectLabel = pairedCore
-      ? "اللغة العربية والتربية الإسلامية"
-      : LBL(i);
-    return `<div class="tc"><div class="th"><span class="dot" style="background:hsl(${i * 27} 70% 60%)"></span><b>${subjectLabel}</b><span class="bd ${n >= m ? "g" : "r"}">${n} من ${m} أستاذ</span></div>
+    return `<div class="tc"><div class="th"><span class="dot" style="background:hsl(${i * 27} 70% 60%)"></span><b>${LBL(i)}</b><span class="bd ${n >= m ? "g" : "r"}">${n} من ${m} أستاذ</span></div>
   <div class="tl">${TN[i].map((t, k) => renderTeacherCard(i, k, t)).join("") || '<span class="em">لم يُضف أي أستاذ بعد</span>'}</div>
   <div class="ad"><input id="in${i}" placeholder="اسم الأستاذ" onkeydown="if(event.key==='Enter'){event.preventDefault();addTeacher(${i})}"><button onclick="addTeacher(${i})">إضافة</button></div></div>`;
   }).join("");
@@ -172,7 +182,7 @@ function renderTeacherCards() {
 const mk = (n) => ({
   n,
   off: Array(35).fill(false),
-  cl: Array(8).fill(true),
+  cl: Array(8).fill(false),
   open: false,
 });
 // -----------------------------------------------------------------------------
@@ -184,23 +194,16 @@ function addTeacher(i) {
     .map((x) => x.trim())
     .filter(Boolean);
   if (!v.length) return;
-  const targets = i === 0 || i === 7 ? [0, 7] : [i];
   v.forEach((name) => {
     const teacher = mk(name);
-    targets.forEach((subject) => TN[subject].push(teacher));
+    teacher.cl.fill(TN[i].length === 0);
+    TN[i].push(teacher);
   });
   renderTeacherCards();
   $("#in" + i).focus();
 }
 function removeTeacher(i, k) {
-  const teacher = TN[i][k];
-  [0, 7].forEach((subject) => {
-    if (i === 0 || i === 7) {
-      const pairedIndex = TN[subject].indexOf(teacher);
-      if (pairedIndex >= 0) TN[subject].splice(pairedIndex, 1);
-    }
-  });
-  if (i !== 0 && i !== 7) TN[i].splice(k, 1);
+  TN[i].splice(k, 1);
   renderTeacherCards();
 }
 let MD = null;
@@ -263,13 +266,18 @@ function setTeacherAvailability(i, k, v) {
 }
 function addSuggestedTeachers() {
   SUB.forEach((s, i) => {
-    if (i == 8 || i == 7) return;
-    const m = i === 0 ? Math.max(mn(0), mn(7)) : mn(i);
-    while (TN[i].length < m) {
-      const teacher = mk(`أستاذ ${s[0]} ${TN[i].length + 1}`);
-      TN[i].push(teacher);
-      if (i === 0) TN[7].push(teacher);
-    }
+    if (i == 8) return;
+    const m = mn(i);
+    while (TN[i].length < m)
+      TN[i].push(mk(`أستاذ ${s[0]} ${TN[i].length + 1}`));
+
+    // Spread all classes as evenly as possible across this subject's teachers.
+    const teachers = TN[i];
+    if (!teachers.length) return;
+    teachers.forEach((teacher) => teacher.cl.fill(false));
+    CL.forEach((_, c) => {
+      teachers[c % teachers.length].cl[c] = true;
+    });
   });
   renderTeacherCards();
 }

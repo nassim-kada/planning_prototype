@@ -274,6 +274,13 @@ input[type="number"] {
   gap: 8px;
   cursor: pointer;
 }
+.ck.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ck input:disabled {
+  cursor: not-allowed;
+}
 .ck input {
   width: 18px;
   height: 18px;
