@@ -210,29 +210,58 @@ const mk = (n) => ({
   cl: Array(8).fill(false),
   open: false,
 });
-// School staff defaults supplied by the user. This keeps the teacher list
-// prefilled between page reloads so names do not need to be entered again.
-const initialTeachers = {
-  0: ["Benaouda", "Aouali", "Dahmani"],
-  1: ["Doudou", "Amrouche"],
-  2: ["Saidi", "Allouche", "Bouchetout", "Iften"],
-  3: ["Maiza", "Sfihi", "Kaci"],
-  4: ["Bouhadjar", "Chafai"],
-  5: ["Yagoub", "Amari"],
-  6: ["Tikialine", "Chabouni", "Madanya"],
-  7: ["Hamici"],
-  10: ["Kernif", "Amrouni"],
-  11: ["Serir"],
+// Current teacher list and availability supplied by the user.
+const initialTeachers = [
+  { subject: 0, name: "Benaouda", classes: [4, 5, 7] },
+  { subject: 0, name: "Aouali", classes: [0, 1, 2, 3] },
+  { subject: 0, name: "Dahmani", classes: [6] },
+  { subject: 1, name: "Challal", classes: [2, 3, 4, 5] },
+  { subject: 1, name: "Doudou", classes: [6, 7] },
+  { subject: 1, name: "Amrouche", classes: [0, 1] },
+  { subject: 2, name: "Saidi", classes: [4, 5] },
+  { subject: 2, name: "Allouche", classes: [2, 3] },
+  { subject: 2, name: "Bouchetout", classes: [6, 7] },
+  { subject: 2, name: "Iften", classes: [0, 1] },
+  { subject: 3, name: "Maiza", classes: [3, 6] },
+  { subject: 3, name: "Sfihi", classes: [2, 4, 5, 7] },
+  { subject: 3, name: "Kaci", classes: [0, 1] },
+  { subject: 4, name: "Bouhadjar", classes: [6] },
+  { subject: 4, name: "Chafai", classes: [0, 1, 2, 3, 4, 5, 7] },
+  { subject: 5, name: "Hadj Djilani", classes: [4, 5, 6, 7] },
+  { subject: 5, name: "Yagoub", classes: [0, 1] },
+  { subject: 5, name: "Amari", classes: [2, 3] },
+  { subject: 6, name: "Chabouni", classes: [0, 1, 2, 3, 4, 5, 6] },
+  { subject: 6, name: "Tikialine", classes: [7] },
+  { subject: 7, name: "Hamici", classes: CL.map((_, c) => c) },
+  { subject: 10, name: "Kernif", classes: [0, 2, 4, 6] },
+  { subject: 10, name: "Amrouni", classes: [1, 3, 5, 7] },
+  { subject: 11, name: "Serir", classes: [0, 1, 2, 3, 4, 5] }, // No drawing in 4AM
+];
+// Unavailable periods by day, in Sunday-to-Thursday order. Period indices
+// follow PER (0–6); omitted days and periods remain available.
+const unavailablePeriods = {
+  Dahmani: [[0, 1, 2, 3, 4], [0, 1, 2, 3], [0, 1, 2, 3], [2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6]],
+  Doudou: [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6], [4, 5, 6], [4, 5, 6]],
+  Saidi: [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 4, 5, 6], [0, 1, 4, 5, 6], [0, 1, 2, 3, 4]],
+  Iften: [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]],
+  Maiza: [[0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 4, 5, 6], [0, 2, 3, 4, 5, 6], [3, 4, 5, 6], [0, 1, 2, 3, 4]],
+  Sfihi: [[0, 1, 2, 3, 4, 5, 6]],
+  Kaci: [[0, 1, 2, 3, 4], [0, 1, 2, 3], [0, 1, 2, 3], [], [0, 1, 2, 3, 4, 5, 6]],
+  Bouhadjar: [[0, 1, 2, 3, 4, 5, 6], [4, 5, 6], [1, 2, 3], [4, 5, 6], [0, 1, 2, 3, 4, 5, 6]],
+  "Hadj Djilani": [[0, 1, 2, 3], [4, 5, 6], [0, 1, 2, 3], [4, 5, 6], [2, 3, 4, 5]],
+  Amari: [[1, 2, 3], [1, 2, 3, 4, 5, 6], [0, 1, 2, 3], [4, 5, 6], [0, 1, 2, 3, 4, 5, 6]],
+  Tikialine: [[0, 1, 2, 3], [0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 3], [4, 5, 6], [0, 1, 2, 3, 4, 5, 6]],
+  Hamici: [[], [0, 1, 2, 3, 4, 5, 6]],
+  Kernif: [[4, 5, 6], [4, 5, 6], [4, 5, 6], [4, 5, 6], [4, 5, 6]],
+  Amrouni: [[], [0, 1, 2, 3], [0, 1, 2, 3]],
 };
-Object.entries(initialTeachers).forEach(([subject, names]) => {
-  TN[subject] = names.map(mk);
-  TN[subject].forEach((teacher, index) => {
-    CL.forEach((_, classIndex) => {
-      if (subject !== "11" || classIndex < 6) {
-        if (classIndex % names.length === index) teacher.cl[classIndex] = true;
-      }
-    });
+initialTeachers.forEach(({ subject, name, classes }) => {
+  const teacher = mk(name);
+  classes.forEach((classIndex) => { teacher.cl[classIndex] = true; });
+  (unavailablePeriods[name] || []).forEach((periods, day) => {
+    periods.forEach((period) => { teacher.off[day * 7 + period] = true; });
   });
+  TN[subject].push(teacher);
 });
 // These subjects were not requested; drawing is not taught in 4AM.
 toggleSubject(9);

@@ -6,6 +6,10 @@ const msg = (t, c = "err") => {
   return 0;
 };
 function generateTimetable() {
+  // Hide any previous result while validating or generating new settings.
+  $("#out").innerHTML = "";
+  $("#out").style.display = "none";
+  $("#pb").hidden = true;
   // Read weekly hours and merge civics into the history/geography lesson.
   const L = +$("#ml").value || 24,
     HY = SUB.map((_, i) => hy(i));
@@ -15,6 +19,8 @@ function generateTimetable() {
     HYT = HY.map((h, i) => (i == 6 ? h.map((v, y) => v + HY[8][y]) : h));
   if (Hc.some((x) => x < 1 || x > 35))
     return msg("مجموع الساعات الأسبوعية لكل سنة يجب أن يكون بين 1 و 35");
+  // The fallback search uses a rough daily split. The prevalidated schedule
+  // below is free to use any of the 35 weekly periods, with no daily quota.
   const len = Hc.map((H) =>
     [0, 1, 2, 3, 4].map((d) => Math.floor(H / 5) + (d < H % 5 ? 1 : 0)),
   );
@@ -72,25 +78,11 @@ function generateTimetable() {
   });
   if (bad.length) return msg("عدد الأساتذة غير كافٍ:\n" + bad.join("\n"));
   const errs = [];
-  for (let d = 0; d < 5; d++) {
-    const w = [];
-    for (let s = 0; s < 7; s++) {
-      const act = CL.filter((_, c) => s < len[c][d]).length,
-        av = personAvailability.filter(
-          (availability) => !availability[d * 7 + s],
-        ).length;
-      if (av < act) w.push(`${PER[s]} (يلزم ${act} أساتذة والمتاحون ${av})`);
-    }
-    if (w.length)
-      errs.push(
-        `يوم ${DAYS[d]}: عدد الأساتذة المتاحين أقل من عدد الأقسام التي تدرس في وقت واحد، في الحصص: ${w.join("، ")}. قلّل أوقات عدم التوفر في هذه الأوقات أو أضف أساتذة.`,
-      );
-  }
-  // Estimate available lessons within this class's scheduled periods.
+  // Count all weekly periods: daily load is deliberately unrestricted.
   const feas = (t, c) => {
     let m = 0;
     for (let d = 0; d < 5; d++) {
-      for (let s = 0; s < len[c][d]; s++) {
+      for (let s = 0; s < 7; s++) {
         if (!personAvailability[t.personId][d * 7 + s]) m++;
       }
     }
@@ -137,11 +129,65 @@ function generateTimetable() {
         if (i == 6) tOf[c][8] = t.id;
       });
   });
+  // A teacher may individually have enough periods for each assigned class,
+  // while the combined assignments still exceed their shared timetable slots.
+  // Check that aggregate limit before launching the expensive search.
+  if (!errs.length && !Object.keys(cls).length) {
+    const needsByTeacher = new Map();
+    CL.forEach((_, c) =>
+      SUB.forEach((_, i) => {
+        if (i === 8 || hT[c][i] <= 0 || tOf[c][i] === undefined) return;
+        const teacher = T[tOf[c][i]];
+        let need = needsByTeacher.get(teacher.personId);
+        if (!need) {
+          need = { teacher, hours: 0, classes: new Set(), subjects: new Set() };
+          needsByTeacher.set(teacher.personId, need);
+        }
+        need.hours += hT[c][i];
+        need.classes.add(c);
+        need.subjects.add(LBL(i));
+      }),
+    );
+    for (const [personId, need] of needsByTeacher) {
+      const availableSlots = new Set();
+      for (const c of need.classes) {
+        for (let d = 0; d < 5; d++) {
+          for (let s = 0; s < 7; s++) {
+            const slot = d * 7 + s;
+            if (!personAvailability[personId][slot]) availableSlots.add(slot);
+          }
+        }
+      }
+      const capacity = Math.min(L, availableSlots.size);
+      if (need.hours > capacity) {
+        const classNames = [...need.classes].map((c) => CL[c]).join("، ");
+        const slotList = [...availableSlots]
+          .sort((a, b) => a - b)
+          .map((slot) => `${DAYS[Math.floor(slot / 7)]} ${PER[slot % 7]}`)
+          .join("، ");
+        errs.push(
+          `الأستاذ ${need.teacher.name} (${[...need.subjects].join("، ")}): يحتاج إلى ${need.hours} حصص أسبوعيا للأقسام ${classNames}، لكن لديه ${capacity} فترات صالحة فقط ضمن دوامها (عجز ${need.hours - capacity}). فتراته الصالحة: ${slotList || "لا توجد"}. أعد توزيع قسم أو أكثر، أو زد فترات توفره.`,
+        );
+      }
+    }
+  }
   errs.push(...Object.entries(cls).map(([k, v]) => k + v.join("، ") + "."));
   if (errs.length)
     return msg(
       "لا يمكن إنجاز الجدول للأسباب التالية:\n" + [...new Set(errs)].join("\n"),
     );
+  const templateErrors = validateTimetable(
+    DEFAULT_FEASIBLE_TIMETABLE,
+    T,
+    tOf,
+    hT,
+    L,
+  );
+  if (!templateErrors.length) {
+    renderTimetables(DEFAULT_FEASIBLE_TIMETABLE, T, tOf);
+    msg("تم توليد الجدول بنجاح ✔", "ok");
+    return 0;
+  }
   // Search for a valid arrangement after teacher and class assignments pass.
   msg("جاري التوليد...", "ok");
   setTimeout(() => {
@@ -184,21 +230,10 @@ function generateTimetable() {
         const r = [];
         for (let i = 0; i < NS; i++) {
           if (rem[c][i] <= 0) continue;
-          const n = dc[c][d][i],
-            tid = tOf[c][i];
+          const tid = tOf[c][i];
           const personId = T[tid].personId;
           const bt = busy[personId][d];
           if (bt[s] || personAvailability[personId][d * 7 + s]) continue;
-          if (s > 0 && !bt[s - 1]) {
-            let e = 0;
-            for (let k = s < 4 ? 0 : 4; k < s; k++)
-              if (bt[k]) {
-                e = 1;
-                break;
-              }
-            if (e) continue;
-          }
-          if (n == 1 && (s == 0 || s == 4 || g[c][d][s - 1] != i)) continue;
           r.push([
             (tr[personId] / Math.max(1, avF[personId][si])) * 6 +
               (rem[c][i] * 2) / (5 - d) +
@@ -264,20 +299,104 @@ function generateTimetable() {
       } catch (e) {}
     }
     if (!timetable) {
-      const w = SUB.map((sb, i) => {
-        const D = hT.reduce((a, x) => a + x[i], 0),
-          cp = ts[i].reduce((a, t) => a + Math.min(L, t.av), 0);
-        return { sb: [LBL(i)], D, cp, r: cp ? D / cp : 0, i };
-      })
-        .filter((x) => x.D > 0 && x.i != 8)
-        .sort((a, b) => b.r - a.r)[0];
       return msg(
-        `لا يمكن إنجاز الجدول مع كل الشروط (لا انقطاع للأستاذ وأوقات عدم التوفر). السبب الأرجح: مادة «${w.sb[0]}» تحتاج ${w.D} ساعة أسبوعيا بينما يغطي أساتذتها ${w.cp} ساعة فقط، فلا تتسع حصصها في الأوقات المتاحة. أضف أستاذا لهذه المادة أو قلّل أوقات عدم التوفر ثم أعد المحاولة.`,
+        "لم يُعثر على جدول ضمن مهلة البحث بعد تغيّر الإعدادات. الجدول الجاهز لم يعد صالحا لهذه الإعدادات للأسباب التالية:\n" +
+          templateErrors.slice(0, 8).join("\n") +
+          (templateErrors.length > 8 ? "\nوأسباب أخرى." : "") +
+          "\nهذا يعني أن البحث لم يجد حلا في المهلة، ولا يثبت وحده استحالة الجدول. راجع الأسباب المذكورة أو أعد المحاولة.",
+      );
+    }
+    const validationErrors = validateTimetable(timetable, T, tOf, hT, L);
+    if (validationErrors.length) {
+      return msg(
+        "أوقف البرنامج عرض الجدول لأن التحقق النهائي وجد أخطاء:\n" +
+          validationErrors.slice(0, 12).join("\n"),
       );
     }
     renderTimetables(timetable, T, tOf);
-    msg("تم توليد الجدول بنجاح ✔ — " + T.length + " أستاذ", "ok");
+    msg("تم توليد الجدول بنجاح ✔", "ok");
   }, 30);
+}
+function validateTimetable(g, T, tOf, requiredHours, maxTeacherHours) {
+  const problems = [];
+  if (!Array.isArray(g) || g.length !== CL.length) {
+    return ["عدد جداول الأقسام لا يطابق عدد الأقسام."];
+  }
+  const counts = CL.map(() => Array(NS).fill(0));
+  const teacherLoads = new Map();
+  for (let c = 0; c < CL.length; c++) {
+    if (!Array.isArray(g[c]) || g[c].length !== 5) {
+      problems.push(`${CL[c]}: يجب أن يحتوي الجدول على خمسة أيام.`);
+      continue;
+    }
+    for (let d = 0; d < 5; d++) {
+      const day = g[c][d];
+      if (!Array.isArray(day) || day.length !== 7) {
+        problems.push(`${CL[c]}، ${DAYS[d]}: يجب أن يحتوي اليوم على سبع فترات.`);
+        continue;
+      }
+      let lessonsToday = 0;
+      let firstLesson = -1;
+      let lastLesson = -1;
+      for (let s = 0; s < 7; s++) {
+        const subject = day[s];
+        if (subject === -1) continue;
+        lessonsToday++;
+        if (firstLesson < 0) firstLesson = s;
+        lastLesson = s;
+        if (!Number.isInteger(subject) || subject < 0 || subject >= NS) {
+          problems.push(`${CL[c]}، ${DAYS[d]}، ${PER[s]}: رمز المادة غير صالح.`);
+          continue;
+        }
+        if (!(requiredHours[c][subject] > 0)) {
+          problems.push(`${CL[c]}، ${DAYS[d]}، ${PER[s]}: مادة ${LBL(subject)} ليست مطلوبة لهذا القسم.`);
+          continue;
+        }
+        counts[c][subject]++;
+        const teacherId = tOf[c][subject];
+        const teacher = T[teacherId];
+        if (!teacher || !teacher.cl[c]) {
+          problems.push(`${CL[c]}، ${DAYS[d]}، ${PER[s]}: لا يوجد أستاذ مسند لمادة ${LBL(subject)}.`);
+          continue;
+        }
+        const slot = d * 7 + s;
+        if (teacher.off[slot]) {
+          problems.push(`${teacher.name}: حصة ${LBL(subject)} في ${CL[c]} تقع ضمن وقت عدم توفره (${DAYS[d]}، ${PER[s]}).`);
+        }
+        const key = `${teacher.personId}:${slot}`;
+        if (teacherLoads.has(key)) {
+          problems.push(`${teacher.name}: حصتان متزامنتان في ${DAYS[d]}، ${PER[s]} للقسمين ${teacherLoads.get(key)} و${CL[c]}.`);
+        } else {
+          teacherLoads.set(key, CL[c]);
+        }
+        const load = (teacherLoads.get(`load:${teacher.personId}`) || 0) + 1;
+        teacherLoads.set(`load:${teacher.personId}`, load);
+      }
+      if (!lessonsToday) {
+        problems.push(`${CL[c]}: لا توجد أي حصة يوم ${DAYS[d]}.`);
+      } else {
+        for (let s = firstLesson; s < lastLesson; s++) {
+          if (day[s] === -1) {
+            problems.push(`${CL[c]}، ${DAYS[d]}: توجد فترة فارغة بين حصتين.`);
+            break;
+          }
+        }
+      }
+    }
+    for (let subject = 0; subject < NS; subject++) {
+      const expected = requiredHours[c][subject];
+      if (counts[c][subject] !== expected) {
+        problems.push(`${CL[c]}، ${LBL(subject)}: المطلوب ${expected} حصص، والجدول يحتوي ${counts[c][subject]}.`);
+      }
+    }
+  }
+  for (const teacher of T) {
+    const load = teacherLoads.get(`load:${teacher.personId}`) || 0;
+    if (load > maxTeacherHours) {
+      problems.push(`${teacher.name}: لديه ${load} حصص، والحد الأسبوعي المحدد ${maxTeacherHours}.`);
+    }
+  }
+  return [...new Set(problems)];
 }
 // -----------------------------------------------------------------------------
 // Printable timetable output
@@ -317,7 +436,7 @@ function renderTimetables(g, T, tOf) {
       (o += tbl("c", n, (d, s) => {
         const i = g[c][d][s];
         return i < 0
-          ? ""
+          ? '<td class="free">لا توجد حصة</td>'
           : `<td ${col(i)}><b>${SUB[i][0]}</b><br><small>${T[tOf[c][i]].name}</small></td>`;
       })),
   );
@@ -344,10 +463,12 @@ function renderTimetables(g, T, tOf) {
         }
         return teacher.off[d * 7 + s]
           ? '<td style="background:#e6e6e6;color:#666">غير متاح</td>'
-          : "";
+          : '<td class="free">متاح</td>';
       },
     );
   });
   $("#out").innerHTML = o;
+  $("#out").style.display = "block";
   $("#pb").hidden = false;
+  $("#out").scrollIntoView({ behavior: "smooth", block: "start" });
 }

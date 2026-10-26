@@ -397,6 +397,11 @@ button.s {
   color: #111;
   min-width: 96px;
 }
+.tt td.free {
+  background: #f4f5f7;
+  color: #68717d;
+  font-size: 0.82rem;
+}
 .tt small {
   color: #333;
 }
