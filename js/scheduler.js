@@ -228,8 +228,27 @@ function generateTimetable() {
       let nodes = 0;
       const cands = (c, d, s, si) => {
         const r = [];
+        // Finish a PE pair in the next period once its first lesson is placed.
+        if (s > 0 && s !== 4 && g[c][d][s - 1] === 10) {
+          const teacherId = tOf[c][10];
+          const personId = T[teacherId].personId;
+          if (busy[personId][d][s] || personAvailability[personId][d * 7 + s])
+            return r;
+          return [[1000, 10]];
+        }
         for (let i = 0; i < NS; i++) {
           if (rem[c][i] <= 0) continue;
+          if (i === 10) {
+            const pairStarts = [0, 1, 2, 4, 5];
+            const nextPeriod = s + 1;
+            const nextSlot = d * 7 + nextPeriod;
+            if (
+              rem[c][10] !== 2 ||
+              !pairStarts.includes(s) ||
+              nextPeriod >= len[c][d] ||
+              personAvailability[T[tOf[c][10]].personId][nextSlot]
+            ) continue;
+          }
           const tid = tOf[c][i];
           const personId = T[tid].personId;
           const bt = busy[personId][d];
@@ -338,6 +357,9 @@ function validateTimetable(g, T, tOf, requiredHours, maxTeacherHours) {
       let lessonsToday = 0;
       let firstLesson = -1;
       let lastLesson = -1;
+      if (day[0] === -1) {
+        problems.push(`${CL[c]}، ${DAYS[d]}: يجب أن تبدأ الدراسة بالحصة الأولى.`);
+      }
       for (let s = 0; s < 7; s++) {
         const subject = day[s];
         if (subject === -1) continue;
@@ -388,6 +410,22 @@ function validateTimetable(g, T, tOf, requiredHours, maxTeacherHours) {
       if (counts[c][subject] !== expected) {
         problems.push(`${CL[c]}، ${LBL(subject)}: المطلوب ${expected} حصص، والجدول يحتوي ${counts[c][subject]}.`);
       }
+    }
+    const sportLessons = [];
+    for (let d = 0; d < 5; d++) {
+      for (let s = 0; s < 7; s++) {
+        if (g[c][d][s] === 10) sportLessons.push([d, s]);
+      }
+    }
+    sportLessons.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    if (
+      requiredHours[c][10] !== 2 ||
+      sportLessons.length !== 2 ||
+      sportLessons[0][0] !== sportLessons[1][0] ||
+      sportLessons[1][1] !== sportLessons[0][1] + 1 ||
+      ![0, 1, 2, 4, 5].includes(sportLessons[0][1])
+    ) {
+      problems.push(`${CL[c]}، ${LBL(10)}: يجب جدولة ساعتين متتاليتين في اليوم نفسه، دون عبور فترة الغداء.`);
     }
   }
   for (const teacher of T) {
