@@ -12,7 +12,7 @@ const SUB = [
   ["التاريخ والجغرافيا", [2, 2, 2, 2]],
   ["التربية الإسلامية", [1, 1, 1, 1]],
   ["التربية المدنية", [1, 1, 1, 1]],
-  ["الإعلام الآلي", [1, 1, 1, 1]],
+  ["الإعلام الآلي", [1, 1, 1, 0]],
   ["التربية البدنية والرياضية", [2, 2, 2, 2]],
   ["التربية الفنية التشكيلية", [1, 1, 1, 1]],
 ];
@@ -225,6 +225,7 @@ const initialTeachers = [
   { subject: 3, name: "Maiza", classes: [3, 6] },
   { subject: 3, name: "Sfihi", classes: [2, 4, 5, 7] },
   { subject: 3, name: "Kaci", classes: [0, 1] },
+  { subject: 9, name: "OUARNOUGHI", classes: [0, 1, 2, 3, 4, 5] },
   { subject: 4, name: "Bouhadjar", classes: [6] },
   { subject: 4, name: "Chafai", classes: [0, 1, 2, 3, 4, 5, 7] },
   { subject: 5, name: "Hadj Djilani", classes: [4, 5, 6, 7] },
@@ -240,6 +241,13 @@ const initialTeachers = [
 // Unavailable periods by day, in Sunday-to-Thursday order. Period indices
 // follow PER (0–6); omitted days and periods remain available.
 const unavailablePeriods = {
+  OUARNOUGHI: [
+    [],
+    [0, 1, 2, 3],
+    [0, 1, 2, 3, 4, 5, 6],
+    [0, 1, 2, 3, 4, 5, 6],
+    [0, 1, 2, 3, 4, 5, 6],
+  ],
   Dahmani: [[0, 1, 2, 3, 4], [0, 1, 2, 3], [0, 1, 2, 3], [2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6]],
   Doudou: [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6], [4, 5, 6], [4, 5, 6]],
   Saidi: [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 4, 5, 6], [0, 1, 4, 5, 6], [0, 1, 2, 3, 4]],
@@ -263,10 +271,8 @@ initialTeachers.forEach(({ subject, name, classes }) => {
   });
   TN[subject].push(teacher);
 });
-// These subjects were not requested; drawing is not taught in 4AM.
-toggleSubject(9);
+// Civics is merged with history/geography; drawing is not taught in 4AM.
 toggleSubject(8);
-$("#subject-row-9").hidden = true;
 $("#subject-row-8").hidden = true;
 $("#h11_3").value = 0;
 savedSubjectHours[11][3] = 0;

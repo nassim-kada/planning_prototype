@@ -17,13 +17,30 @@ function generateTimetable() {
     Hc = hc.map((a) => a.reduce((x, y) => x + y, 0)),
     hT = hc.map((a) => a.map((v, i) => (i == 6 ? v + a[8] : v))),
     HYT = HY.map((h, i) => (i == 6 ? h.map((v, y) => v + HY[8][y]) : h));
-  if (Hc.some((x) => x < 1 || x > 35))
-    return msg("مجموع الساعات الأسبوعية لكل سنة يجب أن يكون بين 1 و 35");
-  // The fallback search uses a rough daily split. The prevalidated schedule
-  // below is free to use any of the 35 weekly periods, with no daily quota.
-  const len = Hc.map((H) =>
-    [0, 1, 2, 3, 4].map((d) => Math.floor(H / 5) + (d < H % 5 ? 1 : 0)),
-  );
+  if (Hc.some((x) => x < 5 || x > 32))
+    return msg(
+      "لا يمكن ملء الحصة الأولى يوميا بهذا المجموع: يجب أن يكون لكل قسم 5 حصص أسبوعيا على الأقل (حصة يوميا)، وبحد أقصى 32 حصة بسبب توقف الدراسة الثلاثاء بعد الظهر.",
+    );
+  // Give every class one first-period lesson each day, then distribute its
+  // remaining hours across the week without exceeding the shorter Tuesday.
+  // Every day's lessons occupy one uninterrupted block from period 1 onward.
+  const len = Hc.map((H) => {
+    const daily = [1, 1, 1, 1, 1];
+    const capacity = [7, 7, 4, 7, 7];
+    let remaining = H - daily.reduce((sum, hours) => sum + hours, 0);
+    while (remaining > 0) {
+      let advanced = false;
+      for (let d = 0; d < 5 && remaining > 0; d++) {
+        if (daily[d] < capacity[d]) {
+          daily[d]++;
+          remaining--;
+          advanced = true;
+        }
+      }
+      if (!advanced) break;
+    }
+    return daily;
+  });
   const T = [];
   const ts = SUB.map(() => []);
   const pairedCoreTeacherIds = new Map();
@@ -78,11 +95,11 @@ function generateTimetable() {
   });
   if (bad.length) return msg("عدد الأساتذة غير كافٍ:\n" + bad.join("\n"));
   const errs = [];
-  // Count all weekly periods: daily load is deliberately unrestricted.
+  // Check availability across every period when students have classes.
   const feas = (t, c) => {
     let m = 0;
     for (let d = 0; d < 5; d++) {
-      for (let s = 0; s < 7; s++) {
+      for (let s = 0; s < (d === 2 ? 4 : 7); s++) {
         if (!personAvailability[t.personId][d * 7 + s]) m++;
       }
     }
@@ -152,7 +169,7 @@ function generateTimetable() {
       const availableSlots = new Set();
       for (const c of need.classes) {
         for (let d = 0; d < 5; d++) {
-          for (let s = 0; s < 7; s++) {
+          for (let s = 0; s < (d === 2 ? 4 : 7); s++) {
             const slot = d * 7 + s;
             if (!personAvailability[personId][slot]) availableSlots.add(slot);
           }
@@ -197,7 +214,7 @@ function generateTimetable() {
       // Backtracking search: place every active class into each required slot.
       const slots = [];
       for (let d = 0; d < 5; d++)
-        for (let s = 0; s < 7; s++) {
+        for (let s = 0; s < (d === 2 ? 4 : 7); s++) {
           const act = CL.map((_, c) => c).filter((c) => s < len[c][d]);
           if (act.length) slots.push([d, s, act]);
         }
@@ -362,6 +379,9 @@ function validateTimetable(g, T, tOf, requiredHours, maxTeacherHours) {
       }
       for (let s = 0; s < 7; s++) {
         const subject = day[s];
+        if (d === 2 && s >= 4 && subject !== -1) {
+          problems.push(`${CL[c]}، ${DAYS[d]}، ${PER[s]}: لا توجد دراسة يوم الثلاثاء بعد الظهر.`);
+        }
         if (subject === -1) continue;
         lessonsToday++;
         if (firstLesson < 0) firstLesson = s;
